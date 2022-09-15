@@ -41,8 +41,7 @@ _function_
  - phase_style_update()  
    根据当前phase更新style。新的style在phase_style_delta中被预设。
    
- #### DOM
- 标签结构：
+ #### 标签结构：   
  - LoadingP
     - body
        - body-inner
