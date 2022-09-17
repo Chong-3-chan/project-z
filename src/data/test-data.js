@@ -8,28 +8,74 @@ const chara_map = {
         name: "李2"
     }
 }
-const resource_base_path = "http://projecta-resource.com/game/";
+// export const resource_base_path = "http://projecta-resource.com/game/";
+export const resource_base_path = "http://pixiv.miunachan.top/game/";
+export const DEFAULT_PAGESTATE={};
 const file_map = {
-    _H_BG_WATER:"home/water.jpg",
-    _H_BG_FLOWER:"home/flower.jpg",
-    
-    _C_A_TEST_1:"chara/a_test_1.png",
-    _C_A_TEST_2:"chara/a_test_2.png",
-    _C_A_TEST_3:"chara/a_test_3.png",
+    _H_BG_WATER: "home/water.jpg",
+    _H_BG_FLOWER: "home/flower.jpg",
 
-    _C_B_TEST_1:"chara/b_test_1.png",
-    _C_B_TEST_2:"chara/b_test_2.png",
-    _C_B_TEST_3:"chara/b_test_3.png",
+    _C_A_TEST_1: "chara/a_test_1.png",
+    _C_A_TEST_2: "chara/a_test_2.png",
+    _C_A_TEST_3: "chara/a_test_3.png",
+
+    _C_B_TEST_1: "chara/b_test_1.png",
+    _C_B_TEST_2: "chara/b_test_2.png",
+    _C_B_TEST_3: "chara/b_test_3.png",
 }
-function createPreloadList(...args){
+function createPreloadList(...args) {
     return args;
 }
-const preload_group = {
-    _H:[_H_BG_WATER,_H_BG_FLOWER],
-    _C_A_TEST:[_C_A_TEST_1,_C_A_TEST_2,_C_A_TEST_3],
-    _C_B_TEST:[_C_B_TEST_1,_C_B_TEST_2,_C_B_TEST_3]
-},PL_G=preload_group;
-PL_G.DEFAULT = createPreloadList(PL_G._H,_C_A_TEST)
+export const preload_group = {
+    _H: {name:"背景图片",data:[file_map._H_BG_WATER, file_map._H_BG_FLOWER]},
+    _C_A_TEST:{name:"TEST人物立绘A", data:[file_map._C_A_TEST_1, file_map._C_A_TEST_2, file_map._C_A_TEST_3]},
+    _C_B_TEST: {name:"TEST人物立绘A", data:[file_map._C_B_TEST_1, file_map._C_B_TEST_2, file_map._C_B_TEST_3]}
+}, PL_G = preload_group;
+DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = createPreloadList(PL_G._H, PL_G._C_A_TEST);
+// DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = [
+//     {name:"背景图片",data:PL_G._H},
+//     {name:"TEST人物立绘A",data:PL_G._C_A_TEST},
+// ]
+
+export const tips_group = {
+    A: [
+        {
+            title: "伏尔坎",
+            text: "伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "伏尔坎1",
+            text: "1伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "伏尔坎2",
+            text: "2伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "伏尔坎3",
+            text: "3伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        }
+    ],
+    B: [
+        {
+            title: "b伏尔坎",
+            text: "伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "b伏尔坎1",
+            text: "1伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "b伏尔坎2",
+            text: "2伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        },
+        {
+            title: "b伏尔坎3",
+            text: "3伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
+        }
+    ]
+};
+DEFAULT_PAGESTATE.tips = tips_group.DEFAULT = [tips_group.A, tips_group.B];
 
 export const sample3 = {
     Sentence1: {
@@ -86,7 +132,8 @@ export const sample3 = {
 export const sample2 = {
     Story1: {
         id: "1-1",
-        preload: createPreloadList(PL_G._C_A_TEST,PL_G._C_B_TEST),
+        title: "一杠一",
+        preload: createPreloadList(PL_G._C_A_TEST),
         data: {
             // Sentence...
             "00000": sample3.Sentence1,
@@ -96,7 +143,8 @@ export const sample2 = {
     },
     Story2: {
         id: "1-2",
-        preload: createPreloadList(PL_G._C_A_TEST,PL_G._C_B_TEST),
+        title: "一杠二",
+        preload: createPreloadList(PL_G._C_B_TEST),
         data: {
             "00000": sample3.Sentence2,
             "00001": sample3.Sentence2
@@ -104,7 +152,8 @@ export const sample2 = {
     },
     Story3: {
         id: "1-3",
-        preload: createPreloadList(PL_G._C_A_TEST,PL_G._C_B_TEST),
+        title: "一杠三",
+        preload: createPreloadList(PL_G._C_A_TEST, PL_G._C_B_TEST),
         data: {
             "00000": sample3.Sentence1,
             "00001": sample3.Sentence1
@@ -121,43 +170,4 @@ export const sample1 = {
             "1-3": sample2.Story3,
         }
     }
-}
-
-export const tips = {
-    A: [
-        {
-            title: "伏尔坎",
-            text: "伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "伏尔坎1",
-            text: "1伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "伏尔坎2",
-            text: "2伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "伏尔坎3",
-            text: "3伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        }
-    ],
-    B: [
-        {
-            title: "b伏尔坎",
-            text: "伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "b伏尔坎1",
-            text: "1伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "b伏尔坎2",
-            text: "2伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        },
-        {
-            title: "b伏尔坎3",
-            text: "3伏尔坎是一座古代机器的代称，于新历13年被共同体先遣队启动。"
-        }
-    ]
 }
