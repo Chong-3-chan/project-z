@@ -19,7 +19,8 @@ function preload(src, callback) {
 const load_phase = ["waiting", "loading", "loaded", "exiting", "exited"];
 
 function LoadingP(props) {
-  const { pageState: state ,pageAction:action} = useContext(pageContext);
+
+  const { pageState: state, pageAction: action } = useContext(pageContext);
   const {
     loadList,
     title
@@ -27,6 +28,7 @@ function LoadingP(props) {
   const { current: tips } = useRef(state.tips.flat(1));
   const [tipNo, setTipNo] = useState(0);
   function changeTip() {
+    if (tips.length <= 1) return;
     let nextNo = ~~(Math.random() * (tips.length - 1));
     tps_api.start(createStyle(QStyle.OP_0, QStyle.LF("-16px"),
       {
@@ -36,14 +38,14 @@ function LoadingP(props) {
         }
       }));
   }
-  const [loadedFileTotal, setLoadedTotal] = useState(0);
+  const [loadedFileTotal, setLoadedFileTotal] = useState(0);
   const [loadedpartTotal, setLoadedPartTotal] = useState(0);
   const [nowPartNo, setNowPartNo] = useState(0);
   const { current: loadingProgress } = useRef(loadList.map(e => ({ done: 0, total: e.data.length })));
-  const { current: file_total } = useRef(eval(loadingProgress.map(e => e.total).join('+')))
-  const [errorTotal, setErrorTotal] = useState(0);
+  const { current: file_total } = useRef(eval(loadingProgress.map(e => e.total).join('+')) ?? 0);
   const [phase, setPhase] = useState("waiting");
-  useEffect(()=>{action.setLoadPhase(phase)},[phase])
+  const [errorTotal, setErrorTotal] = useState(0);
+  useEffect(() => { action.setLoadPhase(phase) }, [phase])
   const phase_style_delta = {
     "waiting": {
       pageStyle: createStyle(QStyle.WD("calc(0vw + 450px)"), QStyle.BGC_000_0, QStyle.OP_1, QStyle.CFG_A, QStyle.LF("-450px")),
@@ -98,18 +100,20 @@ function LoadingP(props) {
     phase_style_delta[phase].msgStyle && ms_api.start(phase_style_delta[phase].msgStyle);
   }
   useEffect(() => {
-    // console.log(total);
-    (loadedFileTotal === file_total) && setTimeout(() => setPhase("loaded"), 2000);
-    bs_api.start(createStyle({ width: `${100 * loadedFileTotal / file_total}%` }));
-  }, [loadedpartTotal])
+    if (phase != "loading") return;
+    // console.log(file_total);
+    if (loadedFileTotal === file_total) setTimeout(() => setPhase("loaded"), 2000);
+    bs_api.start(createStyle({ width: `${file_total ? (100 * loadedFileTotal / file_total) : (100)}%` }));
+  }, [loadedpartTotal, phase])
   const finishNowPartLoading = useRef(null);
   useEffect(() => {
-    if (loadingProgress[nowPartNo].done === loadingProgress[nowPartNo].total) {
-      finishNowPartLoading.current();
-    }
+    if (loadingProgress.length)
+      if (loadingProgress[nowPartNo].done === loadingProgress[nowPartNo].total) {
+        finishNowPartLoading.current();
+      }
   }, [loadedFileTotal])
   useEffect(() => {
-    console.log(loadingProgress)
+    // console.log(loadingProgress)
   }, [nowPartNo])
   async function loadAll() {
     for (let i = 0; i < loadList.length; i++) {
@@ -122,12 +126,14 @@ function LoadingP(props) {
         }
         nowFileList.forEach(path => {
           preload(resource_base_path + path, img => {
-            if (img !== undefined) console.log(img);
+            if (img !== undefined) {
+              // console.log(img);
+            }
             else {
               console.log("failed:get", `"${path}"`);
               setErrorTotal(n => n + 1);
             }
-            setLoadedTotal(n => n + 1);
+            setLoadedFileTotal(n => n + 1);
             loadingProgress[i].done++;
           });
         });
@@ -148,7 +154,8 @@ function LoadingP(props) {
         return;
       case "loaded":
         setTimeout(() => setPhase("exiting"), 500);
-        console.log(errorTotal, loadedFileTotal);
+        action.onLoaded();
+        // console.log(errorTotal, loadedFileTotal);
 
         // ps_api.pause();
         // bds_api.pause();
@@ -169,13 +176,12 @@ function LoadingP(props) {
   const [loadedPersentage, lp_api] = useSpring(() => ({ persentage: 0 }))
   function getLoadMessage() {
     // console.log(loadingProgress)
-    lp_api.start({ persentage: (100 * loadedFileTotal / file_total) })
+    lp_api.start({ persentage: file_total ? (100 * loadedFileTotal / file_total) : (100.0) })
     return <>
       <animated.p>{loadedPersentage.persentage.to(n => {
         if (phase == "loaded") return <>就绪！&nbsp;&nbsp;&nbsp;</>;
         return `${loadedpartTotal < loadList.length ? loadList[nowPartNo].name : ""} ${(~~(n * 100) / 100).toFixed(n < 10 ? 3 : n < 100 ? 2 : 1)} %`
-      }
-      )}</animated.p>
+      })}</animated.p>
       {/* <p>{`加载完成度 ${(100*loadedFileTotal/file_total).toFixed(1)} %`}</p> */}
       {/* <p>{`${loadList[nowPartNo].name} ${loadingProgress[nowPartNo].done} / ${loadingProgress[nowPartNo].total}`}</p> */}
       {/* <p>{`完成部分 ${partTotal} / ${loadList.length}`}</p> */}
@@ -195,8 +201,8 @@ function LoadingP(props) {
         <animated.div className={`footer`}></animated.div>
         <animated.div className={"word"} style={textStyle}>
           <div className={`title`}>{title}</div>
-          <animated.div className={'tip-title'} style={tipStyle}>{tips[tipNo].title}</animated.div>
-          <animated.div className={'tip-text'} style={tipStyle}>{tips[tipNo].text}</animated.div>
+          {tips.length && <><animated.div className={'tip-title'} style={tipStyle}>{tips[tipNo].title}</animated.div>
+            <animated.div className={'tip-text'} style={tipStyle}>{tips[tipNo].text}</animated.div></>}
           <animated.div className={'message'} style={msgStyle}>{getLoadMessage()}</animated.div>
         </animated.div>
 

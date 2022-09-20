@@ -10,7 +10,7 @@ const chara_map = {
 }
 // export const resource_base_path = "http://projecta-resource.com/game/";
 export const resource_base_path = "http://pixiv.miunachan.top/game/";
-export const DEFAULT_PAGESTATE={};
+export const DEFAULT_PAGESTATE = {};
 const file_map = {
     _H_BG_WATER: "home/water.jpg",
     _H_BG_FLOWER: "home/flower.jpg",
@@ -27,17 +27,27 @@ function createPreloadList(...args) {
     return args;
 }
 export const preload_group = {
-    _H: {name:"背景图片",data:[file_map._H_BG_WATER, file_map._H_BG_FLOWER]},
-    _C_A_TEST:{name:"TEST人物立绘A", data:[file_map._C_A_TEST_1, file_map._C_A_TEST_2, file_map._C_A_TEST_3]},
-    _C_B_TEST: {name:"TEST人物立绘A", data:[file_map._C_B_TEST_1, file_map._C_B_TEST_2, file_map._C_B_TEST_3]}
+    _H: { name: "背景图片", data: [file_map._H_BG_WATER, file_map._H_BG_FLOWER] },
+    _C_A_TEST: { name: "TEST人物立绘A", data: [file_map._C_A_TEST_1, file_map._C_A_TEST_2, file_map._C_A_TEST_3] },
+    _C_B_TEST: { name: "TEST人物立绘A", data: [file_map._C_B_TEST_1, file_map._C_B_TEST_2, file_map._C_B_TEST_3] }
 }, PL_G = preload_group;
-DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = createPreloadList(PL_G._H, PL_G._C_A_TEST);
+// DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = createPreloadList(PL_G._H, PL_G._C_A_TEST);
 // DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = [
 //     {name:"背景图片",data:PL_G._H},
 //     {name:"TEST人物立绘A",data:PL_G._C_A_TEST},
 // ]
 
 export const tips_group = {
+    home:[
+        {
+            title: "home tip",
+            text: "111"
+        },
+        {
+            title: "home tip",
+            text: "222"
+        }
+    ],
     A: [
         {
             title: "伏尔坎",
@@ -75,14 +85,17 @@ export const tips_group = {
         }
     ]
 };
-DEFAULT_PAGESTATE.tips = tips_group.DEFAULT = [tips_group.A, tips_group.B];
+// DEFAULT_PAGESTATE.tips = tips_group.DEFAULT = [tips_group.A, tips_group.B];
 
 export const sample3 = {
+    // [ "place in1","place in2","CG in1","CG in2","CG out" ]
     Sentence1: {
-        id: "00000",
+        // id: "00000",
         charaName: chara_map["li"].name,
-        text: "我回来了。",
+        text: "place in1",
         place: "home_1",
+        CG: null,
+        CG_transform:null,
         sound: null,
         charas: {
             "li": {
@@ -95,10 +108,84 @@ export const sample3 = {
         style: "Li",
     },
     Sentence2: {
-        id: "00001",
+        // id: "00001",
         charaName: chara_map["li2"].name,
-        text: "我回来了。2",
-        place: "home_1",
+        text: "place in2",
+        place: "home_2",
+        CG: null,
+        CG_transform:null,
+        sound: null,
+        charas: {
+            "li": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            },
+            "li2": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            }
+        },
+        style: "Li",
+    },
+    Sentence3: {
+        // id: "00002",
+        charaName: chara_map["li2"].name,
+        text: "CG in1",
+        place: "home_2",
+        CG: "CG_1",
+        CG_transform:null,
+        sound: null,
+        charas: {
+            "li": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            },
+            "li2": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            }
+        },
+        style: "Li",
+    },
+    Sentence4: {
+        // id: "00002",
+        charaName: chara_map["li2"].name,
+        text: "CG in2",
+        place: "home_2",
+        CG: "CG_2",
+        CG_transform:null,
+        sound: null,
+        charas: {
+            "li": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            },
+            "li2": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            }
+        },
+        style: "Li",
+    },
+    Sentence5: {
+        // id: "00002",
+        charaName: chara_map["li2"].name,
+        text: "CG out",
+        place: "home_2",
+        CG: null,
+        CG_transform:null,
         sound: null,
         charas: {
             "li": {
@@ -117,6 +204,27 @@ export const sample3 = {
         style: "Li",
     },
     Choice: {
+        charaName: chara_map["li2"].name,
+        text: "Choice",
+        place: "home_2",
+        CG: null,
+        CG_transform:null,
+        sound: null,
+        charas: {
+            "li": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            },
+            "li2": {
+                //chara-state
+                in: null,
+                out: null,
+                move: null,
+            }
+        },
+        style: "Li",
         options: [
             {
                 text: "sentaku_A",
@@ -133,41 +241,75 @@ export const sample2 = {
     Story1: {
         id: "1-1",
         title: "一杠一",
+        start: "00000",
+        end: "00005",
         preload: createPreloadList(PL_G._C_A_TEST),
+        tips:[],
         data: {
             // Sentence...
             "00000": sample3.Sentence1,
             "00001": sample3.Sentence2,
-            "00002": sample3.Choice
+            "00002": sample3.Sentence3,
+            "00003": sample3.Sentence4,
+            "00004": sample3.Sentence5,
+            "00005": sample3.Choice
         }
     },
     Story2: {
         id: "1-2",
         title: "一杠二",
+        start: "00000",
+        end: "00003",
         preload: createPreloadList(PL_G._C_B_TEST),
+        tips:[],
         data: {
-            "00000": sample3.Sentence2,
-            "00001": sample3.Sentence2
+            "00000": sample3.Sentence1,
+            "00001": sample3.Sentence2,
+            "00002": sample3.Sentence3,
+            "00003": sample3.Sentence4
         }
     },
     Story3: {
         id: "1-3",
         title: "一杠三",
+        start: "00000",
+        end: "00000",
         preload: createPreloadList(PL_G._C_A_TEST, PL_G._C_B_TEST),
+        tips:[],
         data: {
-            "00000": sample3.Sentence1,
-            "00001": sample3.Sentence1
+            "00000": sample3.Sentence1
         }
     }
 }
 export const sample1 = {
-    Book: {
-        start: "1-1",
-        end: ["1-2", "1-3"],
-        data: {
-            "1-1": sample2.Story1,
-            "1-2": sample2.Story2,
-            "1-3": sample2.Story3,
+    data: {
+        Book1: {
+            start: "1-1",
+            name: "Book1",
+            end: {
+                "1-2":"在1-2结束", 
+                "1-3":"在1-3结束"
+            },
+            data: {
+                "1-1": sample2.Story1,
+                "1-2": sample2.Story2,
+                "1-3": sample2.Story3,
+            }
         }
     }
 }
+
+export const activePage_map = {
+    home:{
+        name:"home",
+        preload:createPreloadList(PL_G._H),
+        ch:"首页",
+        tips:[tips_group.home]
+    },
+    main:{
+        name:"main",
+        preload:[],
+        ch:"主页面",
+        tips:[]
+    }
+};

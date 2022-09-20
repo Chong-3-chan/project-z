@@ -5,6 +5,7 @@ body {
     position: fixed;
     margin: 0;
     background-color: #000000;
+    user-select: none;
 }
 
 #app {
@@ -69,9 +70,9 @@ body {
     }
 }
 
-.LoadingP {
+.LoadingP,.HomeP {
     height: 100%;
-    width: fit-content;
+    width: 100%;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 1);
     position: absolute;
@@ -220,14 +221,12 @@ body {
     bottom: 0;
     left: 0;
     color: rgba(0, 49, 83, 1);
-    user-select: none;
     border-top: 3px solid transparent;
     outline: 5px solid rgba(229, 221, 215, 1);
 }
 
 .LoadingP .word {
     color: rgba(0, 49, 83, 1);
-    user-select: none;
 }
 
 .LoadingP .title {
@@ -274,4 +273,16 @@ body {
 
 .LoadingP .message p {
     Text-align: right;
+}
+
+.testButton {
+    padding: 20px;
+    background-color: aliceblue;
+    border: 2px solid #333;
+}
+.testText {
+    padding: 10px;
+    background-color:coral;
+    color: aliceblue;
+    border: 2px solid #333;
 }
