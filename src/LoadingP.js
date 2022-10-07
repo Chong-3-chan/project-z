@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { resource_base_path } from "./data/test-data.js"
+import { getFileSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
 import { pageContext } from './App.js'
-import './a.css'
-import './style-1.css'
+import './LoadingP.css'
+import './LoadingP.style-1.css'
+
+/******************* -extra function- *********************/
 function preload(src, callback) {
   let img = new Image();
   img.onload = function () {
@@ -16,25 +18,24 @@ function preload(src, callback) {
   }
   img.src = src;
 }
-const load_phase = ["waiting", "loading", "loaded", "exiting", "exited"];
+/******************* -extra function- *********************/
+const [PHASE_WAITING, PHASE_LOADING, PHASE_LOADED, PHASE_EXITING, PHASE_EXITED]
+  = ["waiting", "loading", "loaded", "exiting", "exited"];
 
 function LoadingP(props) {
-
   const { pageState: state, pageAction: action } = useContext(pageContext);
-  const {
-    loadList,
-    title
-  } = state;
+  const { loadList,title } = state;
   const { current: tips } = useRef(state.tips.flat(1));
   const [tipNo, setTipNo] = useState(0);
   function changeTip() {
     if (tips.length <= 1) return;
     let nextNo = ~~(Math.random() * (tips.length - 1));
-    tps_api.start(createStyle(QStyle.OP_0, QStyle.LF("-16px"),
+    // 可选改进：播放列表方式
+    tps_api.start(createStyle(QStyle.OP_0, QStyle.LF("-0.16rem"),
       {
         onRest: () => {
           setTipNo((nextNo < tipNo) ? nextNo : (nextNo + 1));
-          tps_api.start(createStyle(QStyle.OP_1, QStyle.LF("0px")));
+          tps_api.start(createStyle(QStyle.OP_1, QStyle.LF("0rem")));
         }
       }));
   }
@@ -43,53 +44,52 @@ function LoadingP(props) {
   const [nowPartNo, setNowPartNo] = useState(0);
   const { current: loadingProgress } = useRef(loadList.map(e => ({ done: 0, total: e.data.length })));
   const { current: file_total } = useRef(eval(loadingProgress.map(e => e.total).join('+')) ?? 0);
-  const [phase, setPhase] = useState("waiting");
   const [errorTotal, setErrorTotal] = useState(0);
+  const [phase, setPhase] = useState(PHASE_WAITING);
   useEffect(() => { action.setLoadPhase(phase) }, [phase])
-  const phase_style_delta = {
-    "waiting": {
-      pageStyle: createStyle(QStyle.WD("calc(0vw + 450px)"), QStyle.BGC_000_0, QStyle.OP_1, QStyle.CFG_A, QStyle.LF("-450px")),
-      bodyStyle: createStyle(QStyle.WD("calc(0vw + 150px)"), QStyle.CFG_A),
-      barStyle: createStyle({ width: `${0}%` }, QStyle.CFG_A),
-      bodyInnerStyle: createStyle(QStyle.OP_0, QStyle.CFG_A),
-      textStyle: createStyle(QStyle.OP_0),
-      tipStyle: createStyle(QStyle.OP_0, QStyle.LF("-16px")),
-      msgStyle: createStyle(QStyle.OP_0, QStyle.RG("-16px"), QStyle.CFG_A),
-    },
-    "loading": {
-      pageStyle: createStyle(QStyle.WD("calc(100vw + 450px)"), QStyle.LF("0px")),
-      bodyStyle: createStyle(QStyle.WD("calc(100vw + 150px)")),
+  const phase_style_delta = {};
+  phase_style_delta[PHASE_WAITING] = {
+    pageStyle: createStyle(QStyle.WD("calc(0rem + 3rem)"), QStyle.BGC_000_0, QStyle.OP_1, QStyle.CFG_A, QStyle.LF("-3rem")),
+    bodyStyle: createStyle(QStyle.WD("calc(0rem + 1rem)"), QStyle.CFG_A),
+    barStyle: createStyle({ width: `${0}%` }, QStyle.CFG_A),
+    bodyInnerStyle: createStyle(QStyle.OP_0, QStyle.CFG_A),
+    textStyle: createStyle(QStyle.OP_0),
+    tipStyle: createStyle(QStyle.OP_0, QStyle.LF("-0.16rem")),
+    msgStyle: createStyle(QStyle.OP_0, QStyle.RG("-0.16rem"), QStyle.CFG_A),
+  },
+    phase_style_delta[PHASE_LOADING] = {
+      pageStyle: createStyle(QStyle.WD("calc(16rem + 3rem)"), QStyle.LF("0rem")),
+      bodyStyle: createStyle(QStyle.WD("calc(16rem + 1rem)")),
       barStyle: createStyle(QStyle.FT_B100),
       bodyInnerStyle: createStyle(QStyle.OP_1, QStyle.FT_B100),
       textStyle: createStyle(QStyle.OP_1),
-      tipStyle: createStyle(QStyle.OP_1, QStyle.LF("0px")),
-      msgStyle: createStyle(QStyle.OP_1, QStyle.RG("0px")),
+      tipStyle: createStyle(QStyle.OP_1, QStyle.LF("0rem")),
+      msgStyle: createStyle(QStyle.OP_1, QStyle.RG("0rem")),
     },
-    "loaded": {
-      pageStyle: createStyle(QStyle.RG("0px"), QStyle.CFG_A),
+    phase_style_delta[PHASE_LOADED] = {
+      pageStyle: createStyle(QStyle.RG("0rem"), QStyle.CFG_A),
       bodyStyle: null,
       barStyle: createStyle(QStyle.FT_B120),
       bodyInnerStyle: createStyle(QStyle.OP_0, QStyle.FT_B80),
-      textStyle: createStyle(QStyle.OP_0, QStyle.LF("-16px"))
+      textStyle: createStyle(QStyle.OP_0, QStyle.LF("-0.16rem"))
     },
-    "exiting": {
-      pageStyle: createStyle(QStyle.WD("calc(0vw + 450px)"), QStyle.RG("-450px")),
-      bodyStyle: createStyle(QStyle.WD("calc(0vw + 150px)")),
+    phase_style_delta[PHASE_EXITING] = {
+      pageStyle: createStyle(QStyle.WD("calc(0rem + 3rem)"), QStyle.RG("-3rem"), { onRest: () => action.destroyLoadingP() }),
+      bodyStyle: createStyle(QStyle.WD("calc(0rem + 1rem)")),
       barStyle: null,
     },
-    "exited": {
+    phase_style_delta[PHASE_EXITED] = {
       pageStyle: null,
       bodyStyle: null,
       barStyle: null,
-    }
-  }
+    };
   const [pageStyle, ps_api] = useSpring(() => phase_style_delta[phase].pageStyle);
   const [bodyStyle, bds_api] = useSpring(() => phase_style_delta[phase].bodyStyle);
   const [barStyle, bs_api] = useSpring(() => phase_style_delta[phase].barStyle);
   const [bodyInnerStyle, bdis_api] = useSpring(() => phase_style_delta[phase].bodyInnerStyle);
   const [textStyle, ts_api] = useSpring(() => phase_style_delta[phase].textStyle);
   const [tipStyle, tps_api] = useSpring(() => phase_style_delta[phase].tipStyle);
-  const [msgStyle, ms_api] = useSpring(() => phase_style_delta[phase].msgStyle)
+  const [msgStyle, ms_api] = useSpring(() => phase_style_delta[phase].msgStyle);
   function phase_style_update() {
     phase_style_delta[phase].pageStyle && ps_api.start(phase_style_delta[phase].pageStyle);
     phase_style_delta[phase].bodyStyle && bds_api.start(phase_style_delta[phase].bodyStyle);
@@ -100,17 +100,18 @@ function LoadingP(props) {
     phase_style_delta[phase].msgStyle && ms_api.start(phase_style_delta[phase].msgStyle);
   }
   useEffect(() => {
-    if (phase != "loading") return;
+    if (phase != PHASE_LOADING) return;
     // console.log(file_total);
-    if (loadedFileTotal === file_total) setTimeout(() => setPhase("loaded"), 2000);
+    if (loadedFileTotal === file_total) setTimeout(() => setPhase(PHASE_LOADED), 2000);
     bs_api.start(createStyle({ width: `${file_total ? (100 * loadedFileTotal / file_total) : (100)}%` }));
   }, [loadedpartTotal, phase])
   const finishNowPartLoading = useRef(null);
   useEffect(() => {
-    if (loadingProgress.length)
+    if (loadedFileTotal && loadingProgress.length) {
       if (loadingProgress[nowPartNo].done === loadingProgress[nowPartNo].total) {
-        finishNowPartLoading.current();
+        finishNowPartLoading.current && finishNowPartLoading.current();
       }
+    }
   }, [loadedFileTotal])
   useEffect(() => {
     // console.log(loadingProgress)
@@ -124,13 +125,13 @@ function LoadingP(props) {
           finishNowPartLoading.current = null;
           resolve();
         }
-        nowFileList.forEach(path => {
-          preload(resource_base_path + path, img => {
+        nowFileList.forEach(key => {
+          preload(getFileSrc(key), img => {
             if (img !== undefined) {
               // console.log(img);
             }
             else {
-              console.log("failed:get", `"${path}"`);
+              console.log("failed:get", `"${key}" "${getFileSrc(key)}"`);
               setErrorTotal(n => n + 1);
             }
             setLoadedFileTotal(n => n + 1);
@@ -145,15 +146,16 @@ function LoadingP(props) {
     console.log("load phase:", phase)
     phase_style_update();
     switch (phase) {
-      case "waiting":
+      case PHASE_WAITING:
         console.log("load start", loadList)
-        setTimeout(() => setPhase("loading"), 0);
+        setTimeout(() => setPhase(PHASE_LOADING), 0);
         loadAll();
         return;
-      case "loading":
+      case PHASE_LOADING:
         return;
-      case "loaded":
-        setTimeout(() => setPhase("exiting"), 500);
+      case PHASE_LOADED:
+        setTimeout(() => setPhase(PHASE_EXITING), 500);
+        // console.log(action.onLoaded);
         action.onLoaded();
         // console.log(errorTotal, loadedFileTotal);
 
@@ -163,11 +165,11 @@ function LoadingP(props) {
         // bs_api.pause();
         // ts_api.pause();
         return;
-      case "exiting":
-        setTimeout(() => setPhase("exited"), 1000);
+      case PHASE_EXITING:
+        setTimeout(() => setPhase(PHASE_EXITED), 1000);
         return;
-      case "exited":
-        action.destroyLoadingP();
+      case PHASE_EXITED:
+        // action.destroyLoadingP();
         return;
       default:
         return;
@@ -179,7 +181,7 @@ function LoadingP(props) {
     lp_api.start({ persentage: file_total ? (100 * loadedFileTotal / file_total) : (100.0) })
     return <>
       <animated.p>{loadedPersentage.persentage.to(n => {
-        if (phase == "loaded") return <>就绪！&nbsp;&nbsp;&nbsp;</>;
+        if (phase == PHASE_LOADED) return <>就绪！&nbsp;&nbsp;&nbsp;</>;
         return `${loadedpartTotal < loadList.length ? loadList[nowPartNo].name : ""} ${(~~(n * 100) / 100).toFixed(n < 10 ? 3 : n < 100 ? 2 : 1)} %`
       })}</animated.p>
       {/* <p>{`加载完成度 ${(100*loadedFileTotal/file_total).toFixed(1)} %`}</p> */}
@@ -188,24 +190,21 @@ function LoadingP(props) {
     </>
   }
   return (
-    <animated.div className={`LoadingP style-0 ${(phase.indexOf("exit") != -1) ? "exit" : (phase.indexOf("load") != -1) ? "in" : ""}`} style={pageStyle}>
+    <animated.div className={`LoadingP ${state.nowStyle} ${(phase.indexOf("exit") != -1) ? "exit" : (phase.indexOf("load") != -1) ? "in" : ""}`} style={pageStyle}>
       <animated.div className={`body`} style={bodyStyle} onMouseUp={changeTip}>
-
+        <animated.div className={`header`}></animated.div>
+        <animated.div className={`footer`}></animated.div>
         <animated.div className={`body-inner`} style={bodyInnerStyle}>
           <div className={`logo-mask`}>
             <animated.div className={`loading-back`} style={barStyle}></animated.div>
           </div>
+          <animated.div className={"word"} style={textStyle}>
+            <div className={`title`}>{title}</div>
+            {tips.length>0 && <><animated.div className={'tip-title'} style={tipStyle}>{tips[tipNo].title}</animated.div>
+              <animated.div className={'tip-text'} style={tipStyle}>{tips[tipNo].text}</animated.div></>}
+            <animated.div className={'message'} style={msgStyle}>{getLoadMessage()}</animated.div>
+          </animated.div>
         </animated.div>
-
-        <animated.div className={`header`}></animated.div>
-        <animated.div className={`footer`}></animated.div>
-        <animated.div className={"word"} style={textStyle}>
-          <div className={`title`}>{title}</div>
-          {tips.length && <><animated.div className={'tip-title'} style={tipStyle}>{tips[tipNo].title}</animated.div>
-            <animated.div className={'tip-text'} style={tipStyle}>{tips[tipNo].text}</animated.div></>}
-          <animated.div className={'message'} style={msgStyle}>{getLoadMessage()}</animated.div>
-        </animated.div>
-
       </animated.div>
     </animated.div>
   )

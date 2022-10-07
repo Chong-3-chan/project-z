@@ -8,8 +8,8 @@ const chara_map = {
         name: "李2"
     }
 }
-// export const resource_base_path = "http://projecta-resource.com/game/";
-export const resource_base_path = "http://pixiv.miunachan.top/game/";
+export const resource_base_path = "http://projecta-resource.com/game/";
+// export const resource_base_path = "http://pixiv.miunachan.top/game/";
 export const DEFAULT_PAGESTATE = {};
 const file_map = {
     _H_BG_WATER: "home/water.jpg",
@@ -23,13 +23,17 @@ const file_map = {
     _C_B_TEST_2: "chara/b_test_2.png",
     _C_B_TEST_3: "chara/b_test_3.png",
 }
+export function getFileSrc(file_map_KEY) {
+    if (file_map_KEY in file_map) return resource_base_path + file_map[file_map_KEY];
+    return "";
+}
 function createPreloadList(...args) {
     return args;
 }
 export const preload_group = {
     _H: { name: "背景图片", data: [file_map._H_BG_WATER, file_map._H_BG_FLOWER] },
-    _C_A_TEST: { name: "TEST人物立绘A", data: [file_map._C_A_TEST_1, file_map._C_A_TEST_2, file_map._C_A_TEST_3] },
-    _C_B_TEST: { name: "TEST人物立绘A", data: [file_map._C_B_TEST_1, file_map._C_B_TEST_2, file_map._C_B_TEST_3] }
+    _C_A_TEST: { name: "TEST人物立绘A", data: ["_C_A_TEST_1", "_C_A_TEST_2", "_C_A_TEST_3"] },
+    _C_B_TEST: { name: "TEST人物立绘A", data: ["_C_B_TEST_1", "_C_B_TEST_2", "_C_B_TEST_3"] }
 }, PL_G = preload_group;
 // DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = createPreloadList(PL_G._H, PL_G._C_A_TEST);
 // DEFAULT_PAGESTATE.loadList = PL_G.DEFAULT = [
@@ -38,7 +42,7 @@ export const preload_group = {
 // ]
 
 export const tips_group = {
-    home:[
+    home: [
         {
             title: "home tip",
             text: "111"
@@ -93,9 +97,9 @@ export const sample3 = {
         // id: "00000",
         charaName: chara_map["li"].name,
         text: "place in1",
-        place: "home_1",
+        place: "_H_BG_WATER",
         CG: null,
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -111,9 +115,9 @@ export const sample3 = {
         // id: "00001",
         charaName: chara_map["li2"].name,
         text: "place in2",
-        place: "home_2",
+        place: "_H_BG_FLOWER",
         CG: null,
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -135,9 +139,9 @@ export const sample3 = {
         // id: "00002",
         charaName: chara_map["li2"].name,
         text: "CG in1",
-        place: "home_2",
+        place: "_H_BG_FLOWER",
         CG: "CG_1",
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -159,9 +163,9 @@ export const sample3 = {
         // id: "00002",
         charaName: chara_map["li2"].name,
         text: "CG in2",
-        place: "home_2",
+        place: "_H_BG_FLOWER",
         CG: "CG_2",
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -183,9 +187,9 @@ export const sample3 = {
         // id: "00002",
         charaName: chara_map["li2"].name,
         text: "CG out",
-        place: "home_2",
+        place: "_H_BG_FLOWER",
         CG: null,
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -206,9 +210,9 @@ export const sample3 = {
     Choice: {
         charaName: chara_map["li2"].name,
         text: "Choice",
-        place: "home_2",
+        place: "_H_BG_WATER",
         CG: null,
-        CG_transform:null,
+        CG_transform: null,
         sound: null,
         charas: {
             "li": {
@@ -229,10 +233,12 @@ export const sample3 = {
             {
                 text: "sentaku_A",
                 to: "1-2",
+                jump: "10001",
             },
             {
                 text: "sentaku_B",
                 to: "1-3",
+                jump: "20001",
             },
         ]
     }
@@ -242,26 +248,28 @@ export const sample2 = {
         id: "1-1",
         title: "一杠一",
         start: "00000",
-        end: "00005",
+        end: ["10002", "20002"],
         preload: createPreloadList(PL_G._C_A_TEST),
-        tips:[],
+        tips: [tips_group.A, tips_group.B],
         data: {
             // Sentence...
             "00000": sample3.Sentence1,
             "00001": sample3.Sentence2,
             "00002": sample3.Sentence3,
-            "00003": sample3.Sentence4,
-            "00004": sample3.Sentence5,
-            "00005": sample3.Choice
+            "00003": sample3.Choice,
+            "10001": sample3.Sentence4,
+            "10002": sample3.Sentence4,
+            "20001": sample3.Sentence5,
+            "20002": sample3.Sentence5,
         }
     },
     Story2: {
         id: "1-2",
         title: "一杠二",
         start: "00000",
-        end: "00003",
+        end: ["00003"],
         preload: createPreloadList(PL_G._C_B_TEST),
-        tips:[],
+        tips: [],
         data: {
             "00000": sample3.Sentence1,
             "00001": sample3.Sentence2,
@@ -273,9 +281,9 @@ export const sample2 = {
         id: "1-3",
         title: "一杠三",
         start: "00000",
-        end: "00000",
+        end: ["00000"],
         preload: createPreloadList(PL_G._C_A_TEST, PL_G._C_B_TEST),
-        tips:[],
+        tips: [],
         data: {
             "00000": sample3.Sentence1
         }
@@ -287,8 +295,8 @@ export const sample1 = {
             start: "1-1",
             name: "Book1",
             end: {
-                "1-2":"在1-2结束", 
-                "1-3":"在1-3结束"
+                "1-2": "在1-2结束",
+                "1-3": "在1-3结束"
             },
             data: {
                 "1-1": sample2.Story1,
@@ -299,17 +307,18 @@ export const sample1 = {
     }
 }
 
+
 export const activePage_map = {
-    home:{
-        name:"home",
-        preload:createPreloadList(PL_G._H),
-        ch:"首页",
-        tips:[tips_group.home]
+    home: {
+        name: "home",
+        preload: createPreloadList(PL_G._H),
+        ch: "首页",
+        tips: [tips_group.home]
     },
-    main:{
-        name:"main",
-        preload:[],
-        ch:"主页面",
-        tips:[]
+    main: {
+        name: "main",
+        preload: [],
+        ch: "主页面",
+        tips: []
     }
 };

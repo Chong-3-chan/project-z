@@ -25,13 +25,13 @@
 
 .LoadingP.style-1 .body::before {
     background:
-        radial-gradient(transparent 93%, rgba(238, 235, 204, 0.24) 94%) 80px 80px,
-        radial-gradient(transparent 93%, rgba(238, 235, 204, 0.16) 94%) 40px 40px,
+        radial-gradient(transparent 93%, rgba(238, 235, 204, 0.24) 94%) 1rem 1rem,
+        radial-gradient(transparent 93%, rgba(238, 235, 204, 0.16) 94%) .5rem .5rem,
         radial-gradient(transparent 93%, rgba(238, 235, 204, 0.08) 94%),
         linear-gradient(rgba(238, 235, 204, 0.05), rgba(238, 235, 204, 0.05) 2%, transparent 2%, transparent 31%, rgba(238, 235, 204, 0.05) 31%, rgba(238, 235, 204, 0.05) 35%, transparent 35%, transparent 65%, rgba(238, 235, 204, 0.05) 65%, rgba(238, 235, 204, 0.05) 69%, transparent 69%, transparent 98%, rgba(238, 235, 204, 0.05) 98%),
         linear-gradient(to right, rgba(238, 235, 204, 0.05), rgba(238, 235, 204, 0.05) 2%, transparent 2%, transparent 31%, rgba(238, 235, 204, 0.05) 31%, rgba(238, 235, 204, 0.05) 35%, transparent 35%, transparent 65%, rgba(238, 235, 204, 0.05) 65%, rgba(238, 235, 204, 0.05) 69%, transparent 69%, transparent 98%, rgba(238, 235, 204, 0.05) 98%),
         rgba(1, 132, 127, 1);
-    background-size: 120px 120px;
+    background-size: 1.5rem 1.5rem;
 }
 
 .LoadingP.style-1 .body::after {

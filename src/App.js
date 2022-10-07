@@ -2,9 +2,10 @@ import React, { useState, useEffect, useContext } from 'react'
 import LoadingP from './LoadingP.js'
 import HomeP from './HomeP.js'
 import MainP from './MainP.js'
-
+import './a.css'
 import { resource_base_path, sample1, DEFAULT_PAGESTATE, preload_group, activePage_map } from './data/test-data.js'
 
+/******************* -extra function- *********************/
 function objCopy(obj) {
   if (obj == null) { return null }
   var result = Array.isArray(obj) ? [] : {};
@@ -22,6 +23,32 @@ function objCopy(obj) {
 function log(...args) {
   console.log(...args.map(e => typeof e == "object" ? objCopy(e) : e))
 }
+function Mission() {
+  let list = [];
+  this.__proto__.do = () => list.map(e => e());
+  this.__proto__.clear = () => { list = [] };
+  this.__proto__.add = (...funs) => funs.forEach((fun) => typeof fun == 'function' ? list.push(fun) : (() => { throw "try to add a non-function." })());
+  this.__proto__.finish = () => this.do().length && this.clear();
+}
+function getActivePageDOM(activePage) {
+  switch (activePage) {
+    case "home":
+      return <HomeP></HomeP>
+    case "main":
+      return <MainP></MainP>
+    default:
+      return <></>
+  }
+}
+/******************* -extra function- END *********************/
+
+// 关于存档
+// 本地方案：
+// window.localStorage 所有长期存档
+// window.sessionStorage 页面实时状态存档 防止刷新等误操作退出流程
+// 服务端方案：
+// session
+// 注册-登录-存档
 
 
 const pageState = {//default values
@@ -32,29 +59,32 @@ const pageState = {//default values
   options: {
     //...
   },
-  nowStyle: "",
+  lastStyle: "",
+  nowStyle: "style-1",
   now: {
-    book: "Book1",
-    story: "1-1",
-    sentence: "00000",
+    book: null,
+    story: null,
+    sentence: null,
+    to: null,
   },
   next: {
     book: "Book1",
     story: "1-1",
     sentence: "00002"
   },
-  to: null,
 
   // tips: [],
   // loadList: [],
   ...DEFAULT_PAGESTATE
 };
+const onLoadedMission = new Mission();
 const pageAction = {
+  onLoaded: () => onLoadedMission.finish(),
+  onLoaded_add: (...funs) => onLoadedMission.add(...funs),
   load: null,
   setNext: null,
   setLoadPhase: null,
   toNextSentence: null,
-  onLoaded: null,
   getNow: null,
   destroyLoadingP: null,
   load: null,
@@ -68,43 +98,38 @@ function App(props) {
   const action = pageAction, state = pageState;
 
   const [activePage, setActivePage] = useState(pageState.activePage);
-  useEffect(() => { pageState.activePage = activePage }, [activePage]);
-
   const [loadList, setLoadList] = useState(pageState.loadList);
-  useEffect(() => { pageState.loadList = loadList }, [loadList]);
-
   const [tips, setTips] = useState(pageState.tips);
-  useEffect(() => { pageState.tips = tips }, [tips]);
-
   const [title, setTitle] = useState(pageState.title);
-  useEffect(() => { pageState.title = title }, [title]);
-
   const [loadPhase, setLoadPhase] = useState(pageState.loadPhase);
   pageAction.setLoadPhase = setLoadPhase;
-  useEffect(() => { pageState.loadPhase = loadPhase }, [loadPhase]);
-
   const [options, setOptions] = useState(pageState.options);
-  useEffect(() => { pageState.options = options }, [options]);
-
   const [nowStyle, setNowStyle] = useState(pageState.nowStyle);
+  useEffect(() => { pageState.activePage = activePage }, [activePage]);
+  useEffect(() => { pageState.loadList = loadList }, [loadList]);
+  useEffect(() => { pageState.tips = tips }, [tips]);
+  useEffect(() => { pageState.title = title }, [title]);
+  useEffect(() => { pageState.loadPhase = loadPhase }, [loadPhase]);
+  useEffect(() => { pageState.options = options }, [options]);
   useEffect(() => { pageState.nowStyle = nowStyle }, [nowStyle]);
-
   useEffect(() => {
     log(sample1);
+    // pageAction.setActivePage("home");
+    pageAction.setActivePage("main");
     // action.setNext(pageState.next.book, pageState.next.story, pageState.next.sentence)
-  }, [])
+  }, []);
   const [nowBook, setNowBook] = useState(sample1.data[pageState.now.book]);
-  const [nowStory, setNowStory] = useState(nowBook.data[pageState.now.story]);
-  // useEffect(() => { pageAction.loadStroy(nowStory) }, [nowStory]);
-  const [nowSentence, setNowSentence] = useState(nowStory.data[pageState.now.sentence]);
-
+  const [nowStory, setNowStory] = useState(nowBook?.data[pageState.now.story]);
+  const [nowSentence, setNowSentence] = useState(nowStory?.data[pageState.now.sentence]);
   const [nextBook, setNextBook] = useState(null);
   const [nextStory, setNextStory] = useState(null);
   const [nextSentence, setNextSentence] = useState(null);
-  useEffect(() => { nextStory && pageAction.loadStroy(nextStory) }, [nextStory]);
+  const [to, setTo] = useState(pageState.now.to);
+  useEffect(() => { pageState.now.to = to }, [to]);
   useEffect(() => {
     if (!nextStory) return;
-    action.onLoaded = () => {
+    pageAction.loadStroy(nextStory);
+    action.onLoaded_add(() => {
       if (nextBook) {
         setNowBook(nextBook);
         setNextBook(null);
@@ -115,13 +140,12 @@ function App(props) {
       setNextStory(null);
       pageState.now.story = pageState.next.story;
       pageState.next.story = null;
-      action.onLoaded = null;
 
       setNowSentence(nextSentence);
       setNextSentence(null);
       pageState.now.sentence = pageState.next.sentence;
       pageState.next.sentence = null;
-    }
+    })
   }, [nextBook, nextStory]);
   useEffect(() => {
     if (nextSentence && !nextStory) {
@@ -132,10 +156,21 @@ function App(props) {
     }
   }, [nextSentence])
 
+  pageAction.setTo = function (value_OR_function) {
+    if (typeof value_OR_function != "function") {
+      const _value = value_OR_function;
+      log("setTo", _value);
+      setTo(_value);
+    }
+    else {
+      const _function = value_OR_function;
+      setTo(_function(to));
+    }
+  }
   pageAction.setNext = function (BookName, StoryId, SentenceId) {
     if (loadPhase) {
       log(loadPhase)
-      return;
+      return false;
     }
     log(nowBook, BookName, StoryId, SentenceId)
     let nextBook, nextStory, nextSentence;
@@ -182,8 +217,8 @@ function App(props) {
       setNextSentence(nextSentence);
       pageState.next.sentence = SentenceId;
     }
+    return { nextBook, nextStory, nextSentence };
   }
-
   // pageAction.setNow = function setNow(BookName, StoryId, SentenceId) {
   //   log(nowBook, BookName, StoryId, SentenceId)
   //   let nextBook, nextStory, nextSentence;
@@ -232,32 +267,29 @@ function App(props) {
   //   }
   // }
   pageAction.toNextSentence = function toNextSentence() {
-    if (parseInt(nowStory.end) > parseInt(pageState.now.sentence))
-      pageAction.setNext(undefined, undefined, ((parseInt(pageState.now.sentence) + 1).toString()).padStart(5, "0"));
-    else {
+    // if (parseInt(nowStory.end) > parseInt(pageState.now.sentence))
+    if (nowStory.end.indexOf(pageState.now.sentence) == -1) {
+      return pageAction.setNext(undefined, undefined, ((parseInt(pageState.now.sentence) + 1).toString()).padStart(5, "0"));
+    } else {
       // log("到达end");
       if (to) {
         setTo(null);
-        pageAction.setNext(undefined, to)
+        return pageAction.setNext(undefined, to)
       }
       else if (pageState.now.story in nowBook.end) {
         log("book end:", nowBook.end[pageState.now.story]);
+        return;
       }
       else {
         log("book end", "other");
+        return;
       }
     }
   }
   pageAction.getNow = () => ({ book: nowBook, story: nowStory, sentence: nowSentence })
 
-  const [to, setTo] = useState(pageState.to);
-  useEffect(() => { pageState.to = to }, [to]);
-  pageAction.setTo = function (to_StoryId) {
-    log("setTo", to_StoryId);
-    setTo(to_StoryId);
-  }
 
-  useEffect(() => { log("更新ps:", pageState) });
+  // useEffect(() => { log("更新ps:", pageState) });
   pageAction.destroyLoadingP = function () {
     setLoadPhase(null);
     setTitle(null);
@@ -268,50 +300,34 @@ function App(props) {
     log(loadList, title, tips)
     if (loadPhase) {
       log("有加载进行中！");
-      return;
+      return false;
     }
     setTitle(title);
     setTips(tips);
     setLoadList(loadList);
+    return true;
   }
   useEffect(() => { title && tips && loadList && setLoadPhase("waiting"); }, [title, tips, loadList])
   pageAction.loadStroy = function (story) {
     action.load(story.preload, story.title, story.tips);
   }
 
-  function getActivePageDOM(activePage) {
-    switch (activePage) {
-      case "home":
-        return <HomeP></HomeP>
-      case "main":
-        return <MainP></MainP>
-      default:
-        return <></>
-    }
-  }
+
   pageAction.setActivePage = function (nextActivePageName) {
-    const np = activePage_map[nextActivePageName]
+    const np = activePage_map[nextActivePageName];
+    // if(!np) return false;
     log(np);
-    pageAction.load(np.preload, `进入${np.ch}`, np.tips)
-    action.onLoaded = () => {
+    action.onLoaded_add(() => {
       setActivePage(np.name);
-    }
+    })
+    nextActivePageName != "main" ?
+      pageAction.load(np.preload, `进入${np.ch}`, np.tips)
+      : pageAction.setNext("Book1");// *或读取存档！
   }
-  useEffect(() => { pageAction.setActivePage("home") }, [])
-  // document.body.style.backgroundImage = `url(${resource_base_path + preload_group._H.data[0]})`;
   return (
     <>
       {getActivePageDOM(activePage)}
       {loadPhase && <LoadingP></LoadingP>}
-    </>
-  )
-  return (
-    <>
-      {state != "loading" && <div className='full-page' style={{
-        fontSize: "50vh",
-        lineHeight: "100vh",
-      }}>kkkk</div>}
-      {state != "home" && <LoadingP fileList={fileList} destroy={destroy} tips={tips.A.concat(tips.B)}></LoadingP>}
     </>
   )
 }
