@@ -5,6 +5,7 @@ body {
     position: fixed;
     margin: 0;
     background-color: #000000;
+    color: white;
     user-select: none;
     font-size: 0.2rem;
 }
@@ -28,7 +29,9 @@ html {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: rgba(255, 0, 0, 0.1);
+    /* background-color: rgba(255, 0, 0, 0.1); */
+    background-color: black;
+    background-size: 100% auto;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -63,4 +66,46 @@ html {
     color: aliceblue;
     border: 2px solid #333;
     height: fit-content;
+}
+.ResourceView{
+    overflow: auto;
+    height: 9rem;
+    color: aliceblue;
+    background-color: darkslategray;
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(5,3rem);
+}
+.ResourceView::-webkit-scrollbar {
+    /* width: 0; */
+    display: none;
+}
+
+.ResourceView .viewBox{
+    height: 4rem;
+    outline: 1px solid snow;
+}
+.ResourceView .viewBox img{
+    max-height: 3.5rem;
+    max-width: 3rem;
+}
+.ResourceView .viewBox p{
+    height: .5rem;
+    margin: 0;
+}
+.ResourceView .viewBox a:-webkit-any-link {
+    color: unset;
+    cursor: pointer;
+}
+.ResourceView .viewBox a:focus img{
+    max-height: none;
+    max-width: none;
+    max-height: 95%;
+    max-width: 95%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
 }

@@ -3,33 +3,18 @@ import LoadingP from './LoadingP.js'
 import HomeP from './HomeP.js'
 import MainP from './MainP.js'
 import './a.css'
-import { resource_base_path, sample1, DEFAULT_PAGESTATE, preload_group, activePage_map } from './data/test-data.js'
+import FileInfo from './class/file-info.js'
+import PackageInfo from './class/package-info.js'
+import { objCopy, resource_base_path, bookIds,BOOK, STORY, DEFAULT_PAGESTATE, preload_group, activePage_map, packageSampleUsing, tips_group } from './data/extra-test-data.js'
+// import { resource_base_path, BOOK, DEFAULT_PAGESTATE, preload_group, activePage_map } from './data/test-data.js'
 
-/******************* -extra function- *********************/
-function objCopy(obj) {
-  if (obj == null) { return null }
-  var result = Array.isArray(obj) ? [] : {};
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      if (typeof obj[key] === 'object') {
-        result[key] = objCopy(obj[key]);
-      } else {
-        result[key] = obj[key];
-      }
-    }
-  }
-  return result;
-}
-function log(...args) {
-  console.log(...args.map(e => typeof e == "object" ? objCopy(e) : e))
-}
 function Mission() {
-  let list = [];
-  this.__proto__.do = () => list.map(e => e());
-  this.__proto__.clear = () => { list = [] };
-  this.__proto__.add = (...funs) => funs.forEach((fun) => typeof fun == 'function' ? list.push(fun) : (() => { throw "try to add a non-function." })());
-  this.__proto__.finish = () => this.do().length && this.clear();
-}
+  this.list = [];
+}// 功能：可以在加载完成前添加内容显示任务，并在加载完成时执行之
+Mission.prototype.do = function () { return this.list.map(e => e()) }
+Mission.prototype.clear = function () { this.list = [] }
+Mission.prototype.finish = function () { return this.do().length && this.clear() }
+Mission.prototype.add = function (...funs) { return funs.forEach((fun) => typeof fun == 'function' ? this.list.push(fun) : (() => { throw "try to add a non-function." })()) }
 function getActivePageDOM(activePage) {
   switch (activePage) {
     case "home":
@@ -40,7 +25,6 @@ function getActivePageDOM(activePage) {
       return <></>
   }
 }
-/******************* -extra function- END *********************/
 
 // 关于存档
 // 本地方案：
@@ -54,13 +38,13 @@ function getActivePageDOM(activePage) {
 const pageState = {//default values
   activePage: null,
   loadPhase: null,
-  tips: DEFAULT_PAGESTATE.tips,
+  tips: null,
   title: "基本资源加载",
   options: {
-    //...
+    // 设置相关
   },
   lastStyle: "",
-  nowStyle: "style-1",
+  nowStyle: "style-12",
   now: {
     book: null,
     story: null,
@@ -70,7 +54,7 @@ const pageState = {//default values
   next: {
     book: "Book1",
     story: "1-1",
-    sentence: "00002"
+    sentence: "00000"
   },
 
   // tips: [],
@@ -87,7 +71,6 @@ const pageAction = {
   toNextSentence: null,
   getNow: null,
   destroyLoadingP: null,
-  load: null,
   loadStroy: null,
   setTo: null,
   setActivePage: null
@@ -96,36 +79,35 @@ const pageAction = {
 export const pageContext = React.createContext({ pageState: pageState, pageAction: pageAction });
 function App(props) {
   const action = pageAction, state = pageState;
-
-  const [activePage, setActivePage] = useState(pageState.activePage);
-  const [loadList, setLoadList] = useState(pageState.loadList);
-  const [tips, setTips] = useState(pageState.tips);
-  const [title, setTitle] = useState(pageState.title);
-  const [loadPhase, setLoadPhase] = useState(pageState.loadPhase);
+  const [activePage, setActivePage] = useState(state.activePage);
+  const [loadList, setLoadList] = useState(state.loadList);
+  const [tips, setTips] = useState(state.tips);
+  const [title, setTitle] = useState(state.title);
+  const [loadPhase, setLoadPhase] = useState(state.loadPhase);
   pageAction.setLoadPhase = setLoadPhase;
-  const [options, setOptions] = useState(pageState.options);
-  const [nowStyle, setNowStyle] = useState(pageState.nowStyle);
-  useEffect(() => { pageState.activePage = activePage }, [activePage]);
-  useEffect(() => { pageState.loadList = loadList }, [loadList]);
-  useEffect(() => { pageState.tips = tips }, [tips]);
-  useEffect(() => { pageState.title = title }, [title]);
-  useEffect(() => { pageState.loadPhase = loadPhase }, [loadPhase]);
-  useEffect(() => { pageState.options = options }, [options]);
-  useEffect(() => { pageState.nowStyle = nowStyle }, [nowStyle]);
+  const [options, setOptions] = useState(state.options);
+  const [nowStyle, setNowStyle] = useState(state.nowStyle);
+  useEffect(() => { state.activePage = activePage }, [activePage]);
+  useEffect(() => { state.loadList = loadList }, [loadList]);
+  useEffect(() => { state.tips = tips }, [tips]);
+  useEffect(() => { state.title = title }, [title]);
+  useEffect(() => { state.loadPhase = loadPhase }, [loadPhase]);
+  useEffect(() => { state.options = options }, [options]);
+  useEffect(() => { state.nowStyle = nowStyle }, [nowStyle]);
   useEffect(() => {
-    log(sample1);
+    console.log({ BOOK });
     // pageAction.setActivePage("home");
     pageAction.setActivePage("main");
-    // action.setNext(pageState.next.book, pageState.next.story, pageState.next.sentence)
+    // action.setNext(state.next.book, state.next.story, state.next.sentence)
   }, []);
-  const [nowBook, setNowBook] = useState(sample1.data[pageState.now.book]);
-  const [nowStory, setNowStory] = useState(nowBook?.data[pageState.now.story]);
-  const [nowSentence, setNowSentence] = useState(nowStory?.data[pageState.now.sentence]);
+  const [nowBook, setNowBook] = useState(null);
+  const [nowStory, setNowStory] = useState(null);
+  const [nowSentence, setNowSentence] = useState(null);
   const [nextBook, setNextBook] = useState(null);
   const [nextStory, setNextStory] = useState(null);
   const [nextSentence, setNextSentence] = useState(null);
-  const [to, setTo] = useState(pageState.now.to);
-  useEffect(() => { pageState.now.to = to }, [to]);
+  const [to, setTo] = useState(state.now.to);
+  useEffect(() => { state.now.to = to }, [to]);
   useEffect(() => {
     if (!nextStory) return;
     pageAction.loadStroy(nextStory);
@@ -133,33 +115,34 @@ function App(props) {
       if (nextBook) {
         setNowBook(nextBook);
         setNextBook(null);
-        pageState.now.book = pageState.next.book;
-        pageState.next.book = null;
+        state.now.book = state.next.book;
+        state.next.book = null;
+        parent.postMessage({ from: "weimu", data: { msg: "done", BOOK, STORY, pools: { file: FileInfo.getFilePool(), package: PackageInfo.getPackagePool() } } }, "*");
       }
       setNowStory(nextStory);
       setNextStory(null);
-      pageState.now.story = pageState.next.story;
-      pageState.next.story = null;
+      state.now.story = state.next.story;
+      state.next.story = null;
 
       setNowSentence(nextSentence);
       setNextSentence(null);
-      pageState.now.sentence = pageState.next.sentence;
-      pageState.next.sentence = null;
+      state.now.sentence = state.next.sentence;
+      state.next.sentence = null;
     })
   }, [nextBook, nextStory]);
   useEffect(() => {
     if (nextSentence && !nextStory) {
       setNowSentence(nextSentence);
       setNextSentence(null);
-      pageState.now.sentence = pageState.next.sentence;
-      pageState.next.sentence = null;
+      state.now.sentence = state.next.sentence;
+      state.next.sentence = null;
     }
   }, [nextSentence])
 
   pageAction.setTo = function (value_OR_function) {
     if (typeof value_OR_function != "function") {
       const _value = value_OR_function;
-      log("setTo", _value);
+      console.log("setTo", _value);
       setTo(_value);
     }
     else {
@@ -169,24 +152,28 @@ function App(props) {
   }
   pageAction.setNext = function (BookName, StoryId, SentenceId) {
     if (loadPhase) {
-      log(loadPhase)
+      console.log({ loadPhase })
       return false;
     }
-    log(nowBook, BookName, StoryId, SentenceId)
+    console.log(objCopy({ nowBook, BookName, StoryId, SentenceId }))
     let nextBook, nextStory, nextSentence;
     if (BookName) {
       // 111 100
-      nextBook = sample1.data[BookName];
+      console.log("BOOKK",BOOK);
+      nextBook = BOOK[BookName];
       if (StoryId && SentenceId) {
         // 111
         nextStory = nextBook.data[StoryId];
         nextSentence = nextStory.data[SentenceId];
         setNextBook(nextBook);
         setNextStory(nextStory);
+        setTo(nextStory.to.default);
         setNextSentence(nextSentence);
-        pageState.next.book = BookName;
-        pageState.next.story = StoryId;
-        pageState.next.sentence = SentenceId;
+        state.next.book = BookName;
+        state.next.story = StoryId;
+        state.next.sentence = SentenceId;
+
+        setNowStyle(nextStory.style ?? nextBook.style ?? "");
       }
       else if (!(StoryId || SentenceId)) {
         // 100
@@ -194,10 +181,13 @@ function App(props) {
         nextSentence = nextStory.data[nextStory.start];
         setNextBook(nextBook);
         setNextStory(nextStory);
+        setTo(nextStory.to.default);
         setNextSentence(nextSentence);
-        pageState.next.book = BookName;
-        pageState.next.story = nextBook.start;
-        pageState.next.sentence = nextStory.start;
+        state.next.book = BookName;
+        state.next.story = nextBook.start;
+        state.next.sentence = nextStory.start;
+
+        setNowStyle(nextStory.style ?? nextBook.style ?? "");
       }
     }
     else if (StoryId) {
@@ -206,90 +196,43 @@ function App(props) {
         // 010
         nextSentence = nextStory.data[nextStory.start];
         setNextStory(nextStory);
+        setTo(nextStory.to.default);
         setNextSentence(nextSentence);
-        pageState.next.story = StoryId;
-        pageState.next.sentence = nextStory.start;
+        state.next.story = StoryId;
+        state.next.sentence = nextStory.start;
+
+        setNowStyle(nextStory.style ?? nowBook.style ?? "");
       }
     }
     else if (SentenceId) {
       // 001 *no load!
       nextSentence = nowStory.data[SentenceId];
       setNextSentence(nextSentence);
-      pageState.next.sentence = SentenceId;
+      state.next.sentence = SentenceId;
     }
     return { nextBook, nextStory, nextSentence };
   }
-  // pageAction.setNow = function setNow(BookName, StoryId, SentenceId) {
-  //   log(nowBook, BookName, StoryId, SentenceId)
-  //   let nextBook, nextStory, nextSentence;
-  //   if (BookName) {
-  //     // 111 100
-  //     nextBook = sample1.data[BookName];
-  //     if (StoryId && SentenceId) {
-  //       // 111
-  //       nextStory = nextBook.data[StoryId];
-  //       nextSentence = nextStory.data[SentenceId];
-  //       setNowBook(nextBook);
-  //       setNowStory(nextStory);
-  //       setNowSentence(nextSentence);
-  //       pageState.now.book = BookName;
-  //       pageState.now.story = StoryId;
-  //       pageState.now.sentence = SentenceId;
-  //     }
-  //     else if (!(StoryId || SentenceId)) {
-  //       // 100
-  //       nextStory = nextBook.data[nextBook.start];
-  //       nextSentence = nextStory.data[nextStory.start];
-  //       setNowBook(nextBook);
-  //       setNowStory(nextStory);
-  //       setNowSentence(nextSentence);
-  //       pageState.now.book = BookName;
-  //       pageState.now.story = nextBook.start;
-  //       pageState.now.sentence = nextStory.start;
-  //     }
-  //   }
-  //   else if (StoryId) {
-  //     nextStory = nowBook.data[StoryId];
-  //     if (!SentenceId) {
-  //       // 010
-  //       nextSentence = nextStory.data[nextStory.start];
-  //       setNowStory(nextStory);
-  //       setNowSentence(nextSentence);
-  //       pageState.now.story = StoryId;
-  //       pageState.now.sentence = nextStory.start;
-  //     }
-  //   }
-  //   else if (SentenceId) {
-  //     // 001 *no load!
-  //     nextSentence = nowStory.data[SentenceId];
-  //     setNowSentence(nextSentence);
-  //     pageState.now.sentence = SentenceId;
-  //   }
-  // }
   pageAction.toNextSentence = function toNextSentence() {
-    // if (parseInt(nowStory.end) > parseInt(pageState.now.sentence))
-    if (nowStory.end.indexOf(pageState.now.sentence) == -1) {
-      return pageAction.setNext(undefined, undefined, ((parseInt(pageState.now.sentence) + 1).toString()).padStart(5, "0"));
+    if (nowStory.end.indexOf(state.now.sentence) == -1) {
+      return pageAction.setNext(undefined, undefined,
+        ((parseInt(state.now.sentence) + 1).toString()).padStart(state.now.sentence.length, "0"));
     } else {
-      // log("到达end");
+      // console.log("到达end");
       if (to) {
         setTo(null);
         return pageAction.setNext(undefined, to)
       }
-      else if (pageState.now.story in nowBook.end) {
-        log("book end:", nowBook.end[pageState.now.story]);
+      else if (state.now.story in nowBook.end) {
+        console.log("book end:", nowBook.end[state.now.story]);
         return;
       }
       else {
-        log("book end", "other");
+        console.log("book end", "other");
         return;
       }
     }
   }
   pageAction.getNow = () => ({ book: nowBook, story: nowStory, sentence: nowSentence })
-
-
-  // useEffect(() => { log("更新ps:", pageState) });
   pageAction.destroyLoadingP = function () {
     setLoadPhase(null);
     setTitle(null);
@@ -297,32 +240,43 @@ function App(props) {
     setLoadList(null);
   }
   pageAction.load = function (loadList, title = "", tips = []) {
-    log(loadList, title, tips)
+    console.log(objCopy({
+      loadList, title, tips, packageSampleUsing
+    }), "action:load")
     if (loadPhase) {
-      log("有加载进行中！");
+      console.log("有加载进行中！");
       return false;
     }
     setTitle(title);
-    setTips(tips);
-    setLoadList(loadList);
+    setTips(tips.map(e=>tips_group[e]));
+    setLoadList((packageSampleUsing || !nextBook) ? loadList : ((() => {
+      const re = {};
+      Object.values(nextBook.data).map(e => e.preload).flat(1).forEach(({ name, data }) => {
+        re[name] ?? (re[name] = { name: name, data: (new Set()) });
+        // re[name].data.push(...data);
+        data.forEach(e => re[name].data.add(e));
+      });
+      return Object.values(re).map(({ name, data }) => {
+        return ({ name, data: Array.from(data.values()).sort((a, b) => a.localeCompare(b)) });
+      });
+    })()));
     return true;
   }
   useEffect(() => { title && tips && loadList && setLoadPhase("waiting"); }, [title, tips, loadList])
   pageAction.loadStroy = function (story) {
+    // debugger;
     action.load(story.preload, story.title, story.tips);
   }
-
-
   pageAction.setActivePage = function (nextActivePageName) {
     const np = activePage_map[nextActivePageName];
     // if(!np) return false;
-    log(np);
+    console.log(np);
     action.onLoaded_add(() => {
       setActivePage(np.name);
     })
     nextActivePageName != "main" ?
       pageAction.load(np.preload, `进入${np.ch}`, np.tips)
-      : pageAction.setNext("Book1");// *或读取存档！
+      : pageAction.setNext(bookIds[0]);// *或读取存档！
   }
   return (
     <>

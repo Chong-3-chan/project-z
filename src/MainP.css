@@ -1,10 +1,10 @@
 .MainP {
-    color: aliceblue;
+    color: white;
 }
 
 .MainP .textBar {
-    background-color: rgba(0, 255, 0, 0.2);
-    height: 28%;
+    background-color: rgba(32, 32, 32, 0.6);
+    height: 2.52rem;
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -13,47 +13,52 @@
 
 .MainP .textBar .charaName {
     position: absolute;
-    top: -4px;
+    top: -.05rem;
     left: 0;
     font-weight: 600;
     text-align: center;
-    padding-left: 10px;
-    width: 182px;
-    font-size: 20px;
-    line-height: 40px;
+    padding-left: .1rem;
+    width: 2rem;
+    font-size: .25rem;
+    line-height: .48rem;
+    height: .5rem;
 }
 
 .MainP .textBar .charaName::after {
     content: "";
     position: absolute;
-    left: -20px;
+    left: -.2rem;
     right: 0;
     top: 0;
     bottom: 0;
     background-color: rebeccapurple;
     z-index: -1;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: .05rem;
     transform: skew(315deg);
 }
+
 .MainP .textBar .charaName::before {
     content: "";
     position: absolute;
-    left: -12px;
-    right: -8px;
-    top: 0px;
-    bottom: -2px;
+    left: -.12rem;
+    right: -.08rem;
+    top: 0;
+    bottom: -.02rem;
     background-color: #8844cc;
     z-index: -1;
-    border-radius: 5px 5px 5px 5px;
+    border-radius: .05rem;
     transform: skew(315deg);
 }
 
 .MainP .textBar .text {
-    margin: 48px 80px;
-    margin-bottom: 0;
+    /* margin: .6rem .8rem; */
+    /* margin-bottom: 0; */
+    padding: .6rem .8rem;
+    padding-bottom: 0;
     text-align: left;
-    text-indent: 32px;
-    font-size: 18px;
+    text-indent: .48rem;
+    font-size: .28rem;
+    height: 1.92rem;
 }
 
 .MainP .choice {
@@ -77,38 +82,242 @@
 
 .MainP .choice .option {
     background-color: cadetblue;
-    line-height: 48px;
-    font-size: 18px;
+    line-height: .7rem;
+    font-size: .25rem;
     margin: 0 auto;
-    margin-bottom: 8px;
-    width: 648px;
+    margin-bottom: .2rem;
+    width: 12rem;
+    text-align: center;
 }
 
 .MainP .buttonBar {
     position: absolute;
     right: 0;
-    top:0;
+    top: 0;
     height: fit-content;
 }
 
-.MainP .buttonBar .button{
+.MainP .buttonBar .button {
     float: left;
-    border-left:1px solid white;
-    width: 128px;
+    border-left: 1px solid rgba(192, 192, 192, .6);
+    width: 1.5rem;
     text-align: center;
-    line-height: 40px;
+    line-height: .5rem;
+    cursor: pointer;
+    color: rgb(192, 192, 192);
+    /* background-color: rgba(255, 255, 255, 0); */
+}
+
+.MainP .buttonBar .button:hover {
+    float: left;
+    border-left: 1px solid rgba(192, 192, 192, .6);
+    width: 1.5rem;
+    text-align: center;
+    line-height: .5rem;
+    cursor: pointer;
+    color: rgb(255, 255, 255);
+    /* background-color: rgba(255, 255, 255, .2); */
 }
 
 .MainP .placeBox {
     position: absolute;
     height: 100%;
     width: 100%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    overflow: hidden;
 }
-.MainP .placeBox img{
+
+.MainP .placeBox img {
     position: absolute;
     height: 100%;
     /* min-width: 100%; */
     top: 50%;
     left: 50%;
-    transform: translate(-50%,-50%);
+    transform: translate(-50%, -50%);
+}
+
+.MainP .CGBox {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    left: 0;
+    right: 0;
+    margin: auto;
+    overflow: hidden;
+}
+
+.MainP .CGBox img {
+    position: absolute;
+    height: 100%;
+    /* min-width: 100%; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.MainP .last {
+    /* filter: grayscale(50%); */
+}
+
+.MainP .charaBox {
+    position: absolute;
+    margin: auto;
+    overflow: hidden;
+}
+
+.MainP .charaBox img {
+    position: absolute;
+    height: 100%;
+    /* min-width: 100%; */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.MainP .charaBox.a_1 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 0rem;
+    width: 6rem;
+    right: 10rem;
+}
+
+.MainP .charaBox.a_2 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 5rem;
+    width: 6rem;
+    right: 5rem;
+}
+
+.MainP .charaBox.a_3 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 10rem;
+    width: 6rem;
+    right: 0rem;
+}
+
+.MainP .charaBox.b_1 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 1rem;
+    width: 8rem;
+    right: 6rem;
+}
+
+.MainP .charaBox.b_2 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 4rem;
+    width: 8rem;
+    right: 4rem;
+}
+
+.MainP .charaBox.b_3 {
+    top: 1rem;
+    height: 8rem;
+    bottom: 0rem;
+
+    left: 6rem;
+    width: 8rem;
+    right: 1rem;
+}
+
+.MainP .historyView {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: 0;
+    background-color: rgba(32, 32, 32, 0.2);
+}
+
+.MainP .historyView .close {
+    position: absolute;
+    right: .2rem;
+    top: .2rem;
+    height: .6rem;
+    width: .6rem;
+    background-size: .6rem;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADB0lEQVRYR8XZSXLTQBQG4P9lBRQnSFFcQ7JkkHwTQhKmAAEWkHkeYAcEwjyuqOIQlqssW+YCsKUqrNiwgV38KLnsRGl3Sy3Jlr20WurP/2t1t2Sq+d8uMtr7AJ1i8FLFNr9ghJ9aI5hlxiaA34SxCfL84BeA8a6JmflKpVx6OwqjVw9WQFiP9P0jBP4FcCbyJQN81bVLb4pESnBh9wdUbQRzxNgVMIUiFTgmpgkKYVW/tUXgxVEga35rlcFrYt9EuOZY5usOMPzU/GCTgSVVw2GUOwkX9nkELBqpg+sDFoWs+s01Aq3qVOtEgkWUW4VTzRxSYAj16sEGCMv9v5KuO5bxKsuY9BrBOhgraW5GJXDQyCw46RgUk1ElyUw3KmXjpU6SKpzOqhWbYK9zdQfJyDw4rQTzINXp66/3WglmQSpvMqZpp2y80xkaqRJMQgI849qlF7E3V0pcJmB4UsxcNkOgcemSmQGXGRiDlFWOiTDlWOZ73bJG26Uag2IHiiSjzXLhciV4vCxKt0vh4dy4gQAVe8kOEMBN1zb3s5S2d07OEks3umKJbzmW+TwrMjPQ85vbAC0IHbcBjImbASJkRmYCqnBEmOY2zglPZp1yM9PtStl4ljbJ1MCY5KZc2/zQnajFx8fMyFRArxHsgDEvKesRLrLiLIOxIZY7bZLawDS4QSK1gArcIYDpXllVY8trBNIkAZ517dJe0phMBNbqwS4T5oQLaeF651T95hKBwvctJ6YgHWQscBA4DeQd1y49VSWpBA4Slwcpf+xUlJXBUxW79DFp3MQdjym3NMk+YNVvPSTwA3HMDQJ3vMFoLjJoSzIm+5AngEXgkpBEuOtY5pO+zYLnNx8BdF9MjpgmnbLxKU9ZVefWfHmSUWQnwVHgjibzemsBxNt9Kw7hXsUyH5NiIj0cZnJiop4CCWAyfAX8D8DpyEmF4hKSPCDPb/4E6Hy34SERXXYs4/MwxlzSNb16MA/CTqTdd/LqrQsg3gPoLAjzrmV8TbrQMI93/4YIXwn/aVP70n+OfBhghPU19QAAAABJRU5ErkJggg==);
+}
+
+.MainP .historyView::before {
+    content: "History";
+    position: absolute;
+    font-size: 1rem;
+    right: .5rem;
+    bottom: 0rem;
+    color: rgba(255, 255, 255, 0.2);
+}
+
+.MainP .historyView .historyList {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    width: 12rem;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(32, 32, 32, 0.6);
+    height: 9rem;
+    overflow-y: auto;
+}
+.MainP .historyView .historyList::-webkit-scrollbar{
+    width: .1rem;
+}
+.MainP .historyView .historyList::-webkit-scrollbar-thumb{
+    background: rgba(192,192,192,0.5); 
+    border-radius: .1rem;
+}
+
+.MainP .historyView .historyList .historySentence {
+    position: relative;
+    height: 1.48rem;
+    display: flex;
+    border-top:.02rem solid rgba(255,255,255,0.2);
+}
+.MainP .historyView .historyList .historySentence div {
+    background-color: rgba(255,255,255,0.1);
+    font-size: .24rem;
+    padding: .1rem .2rem ;
+}
+
+.MainP .historyView .historyList .historySentence .charaName {
+    height: 1.28rem;
+    width: 1.6rem;
+    text-align: end;
+    /* line-height: 1.28rem; */
+}
+.MainP .historyView .historyList .historySentence .text {
+    height: 1.28rem;
+    width: 9.3rem;
+}
+.MainP .historyView .historyList .historySentence .go {
+    height: 1.28rem;
+    width: .98rem;
+    border-left: .02rem solid rgba(255,255,255,0.2);
+    line-height: 1.28rem;
+}
+.MainP .cover{
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: rgb(0,0,0);
 }

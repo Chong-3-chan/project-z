@@ -1,28 +1,26 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { getFileSrc, getPackagePath, file_map, objCopy } from "./data/extra-test-data.js"
+import { getFileSrc } from "./data/extra-test-data.js"
 // import { getFileSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
 import { pageContext } from './App.js'
-import PackageInfo from './class/package-info.js'
-import FileInfo from './class/file-info.js'
 import './LoadingP.css'
 import './LoadingP.style-04.css'
 import './LoadingP.style-12.css'
 
-function preload(dat, callback) {
-  // let img = new Image();
-  // img.onload = function () {
-  //   img.onload = null;
-  //   callback(img);
-  // }
-  // img.onerror = function () {
-  //   callback(undefined);
-  // }
-  // img.src = src;
-  callback(dat);
+/******************* -extra function- *********************/
+function preload(src, callback) {
+  let img = new Image();
+  img.onload = function () {
+    img.onload = null;
+    callback(img);
+  }
+  img.onerror = function () {
+    callback(undefined);
+  }
+  img.src = src;
 }
-// const test_zip_path = "http://projecta-resource.com/extra_test_active/test.zip";
+/******************* -extra function- *********************/
 const [PHASE_WAITING, PHASE_LOADING, PHASE_LOADED, PHASE_EXITING, PHASE_EXITED]
   = ["waiting", "loading", "loaded", "exiting", "exited"];
 
@@ -79,20 +77,11 @@ function LoadingP(props) {
         }
       }));
   }
-  const [downloadedPackageNum, setDownloadedPackageNum] = useState(0);
-  const [loadedFileNum, setLoadedFileNum] = useState(0);
-  const [loadedpartNum, setLoadedPartNum] = useState(0);
+  const [loadedFileTotal, setLoadedFileTotal] = useState(0);
+  const [loadedpartTotal, setLoadedPartTotal] = useState(0);
   const [nowPartNo, setNowPartNo] = useState(0);
-  const [getErrorMsg, setErrorMsg] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
-  const [getPackages, setPackages] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
-  const [getLoadingProgress, setLoadingProgress] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
-  const [getFile_total, setFile_total] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
-  useEffect(() => {
-    setPackages(PackageInfo.createPackageInfoList(Object.fromEntries(Array.from(new Set((loadList.map(e => e.data)).flat(1).map(e => file_map[e].packageKey))).map(e => [e, getPackagePath(e)]))));
-    setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length })));
-    console.log(getLoadingProgress(), setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length }))))
-    setFile_total(eval(getLoadingProgress().map(e => e.total).join('+')) ?? 0);
-  }, []);
+  const { current: loadingProgress } = useRef(loadList.map(e => ({ done: 0, total: e.data.length })));
+  const { current: file_total } = useRef(eval(loadingProgress.map(e => e.total).join('+')) ?? 0);
   const [errorTotal, setErrorTotal] = useState(0);
   const [phase, setPhase] = useState(PHASE_WAITING);
   useEffect(() => { action.setLoadPhase(phase) }, [phase])
@@ -116,18 +105,17 @@ function LoadingP(props) {
   useEffect(() => {
     if (phase != PHASE_LOADING) return;
     // console.log(file_total);
-    if (loadedFileNum === getFile_total()) setTimeout(() => setPhase(PHASE_LOADED), 2000);
-    // bs_api.start(createStyle({ width: `${getFile_total() ? (100 * loadedFileNum / getFile_total()) : (100)}%` }));
-    bs_api.start(createStyle({ width: `${95 + (getFile_total() ? (5 * loadedFileNum / getFile_total()) : (5))}%` }));
-  }, [loadedpartNum, phase])
-  const [getFinishNowPartLoading, setFinishNowPartLoading] = ((e) => [() => e.current, (value) => e.current = value])(useRef(null));
+    if (loadedFileTotal === file_total) setTimeout(() => setPhase(PHASE_LOADED), 2000);
+    bs_api.start(createStyle({ width: `${file_total ? (100 * loadedFileTotal / file_total) : (100)}%` }));
+  }, [loadedpartTotal, phase])
+  const [finishNowPartLoading, setFinishNowPartLoading] = ((e) => [e.current, (value) => e.current = value])(useRef(null));
   useEffect(() => {
-    if (loadedFileNum && getLoadingProgress().length) {
-      if (getLoadingProgress()[nowPartNo].done === getLoadingProgress()[nowPartNo].total) {
-        getFinishNowPartLoading() && getFinishNowPartLoading()();
+    if (loadedFileTotal && loadingProgress.length) {
+      if (loadingProgress[nowPartNo].done === loadingProgress[nowPartNo].total) {
+        finishNowPartLoading && finishNowPartLoading();
       }
     }
-  }, [loadedFileNum])
+  }, [loadedFileTotal])
   useEffect(() => {
     // console.log(loadingProgress)
   }, [nowPartNo])
@@ -141,21 +129,20 @@ function LoadingP(props) {
           resolve();
         })
         nowFileList.forEach(key => {
-          preload(getFileSrc(key), (dat) => {
-            if (dat !== undefined) {
+          preload(getFileSrc(key), img => {
+            if (img !== undefined) {
               // console.log(img);
-              // console.log("successed:get", `"${key}" "${getFileSrc(key)}"`);
             }
             else {
               console.log("failed:get", `"${key}" "${getFileSrc(key)}"`);
               setErrorTotal(n => n + 1);
             }
-            setLoadedFileNum(n => n + 1);
-            getLoadingProgress()[i].done++;
+            setLoadedFileTotal(n => n + 1);
+            loadingProgress[i].done++;
           });
         });
       })
-      setLoadedPartNum(n => n + 1);
+      setLoadedPartTotal(n => n + 1);
     }
   }
   useEffect(() => {
@@ -163,45 +150,9 @@ function LoadingP(props) {
     phase_style_update();
     switch (phase) {
       case PHASE_WAITING:
-        console.log("load start", loadList, getPackages())
+        console.log("load start", loadList)
         setTimeout(() => setPhase(PHASE_LOADING), 0);
-        const packageDownloadingPercent = Object.fromEntries(Object.keys(getPackages()).map(e => [e, 0]));
-        Promise.allSettled(Object.entries(getPackages()).map(([packageName, e]) =>
-          e.load((msg) => {
-            console.log(objCopy({ msg, packageName }), "mmm");
-            switch (msg.state) {
-              case "downloading":
-                packageDownloadingPercent[packageName] = msg.percent;
-                bs_api.start(createStyle({ width: `${0.95 * Object.values(packageDownloadingPercent).reduce((a, b) => a + b) / Object.values(packageDownloadingPercent).length}%` }));
-                break;
-              case "done":
-                console.log(msg.data);
-                Object.entries(msg.data).forEach(([fileName, data]) => {
-                  e.data[fileName] = new FileInfo(packageName, fileName, "image/*", data);
-                });
-                setDownloadedPackageNum(n => n + 1);
-                break;
-              case "loading":
-                break;
-              case "error":
-                console.log({
-                  ...(getErrorMsg() ?? {}),
-                  packageLoading: { ...(getErrorMsg()?.packageLoading ?? {}), ...(Object.fromEntries([[packageName, msg.error.toString()]])) }
-                })
-                setErrorMsg({
-                  ...(getErrorMsg() ?? {}),
-                  packageLoading: { ...(getErrorMsg()?.packageLoading ?? {}), ...(Object.fromEntries([[packageName, msg.error.toString()]])) }
-                })
-                setDownloadedPackageNum(n => n + 1);
-                break;
-              default:
-                break;
-            }
-          }).then((re) => {
-            console.log(re, packageName, getPackages()[packageName], "file load done");
-          })
-        )).then(() => loadAll());
-
+        loadAll();
         return;
       case PHASE_LOADING:
         return;
@@ -229,28 +180,11 @@ function LoadingP(props) {
   const [loadedPersentage, lp_api] = useSpring(() => ({ persentage: 0 }))
   function getLoadMessage() {
     // console.log(loadingProgress)
-    lp_api.start({ persentage: getFile_total() ? (100 * loadedFileNum / getFile_total()) : (100.0) })
+    lp_api.start({ persentage: file_total ? (100 * loadedFileTotal / file_total) : (100.0) })
     return <>
       <animated.p>{loadedPersentage.persentage.to(n => {
-        if (getErrorMsg()) return `加载出错:${JSON.stringify(getErrorMsg())}`
         if (phase == PHASE_LOADED) return <>就绪！&nbsp;&nbsp;&nbsp;</>;
-        else {
-          if (loadedpartNum == 0) {
-            if (downloadedPackageNum == 0) {
-              return `资源包下载中...`;
-            }
-            else {
-              const packageTotal = Object.keys(getPackages()).length;
-              if (downloadedPackageNum < packageTotal) {
-                return `资源包下载中... ${downloadedPackageNum} / ${packageTotal}`;
-              }
-              else {
-                return `准备部署资源...`;
-              }
-            }
-          }
-          return `${loadedpartNum < loadList.length ? loadList[nowPartNo].name : ""} ${(~~(n * 100) / 100).toFixed(n < 10 ? 3 : n < 100 ? 2 : 1)} %`
-        }
+        return `${loadedpartTotal < loadList.length ? loadList[nowPartNo].name : ""} ${(~~(n * 100) / 100).toFixed(n < 10 ? 3 : n < 100 ? 2 : 1)} %`
       })}</animated.p>
       {/* <p>{`加载完成度 ${(100*loadedFileTotal/file_total).toFixed(1)} %`}</p> */}
       {/* <p>{`${loadList[nowPartNo].name} ${loadingProgress[nowPartNo].done} / ${loadingProgress[nowPartNo].total}`}</p> */}
