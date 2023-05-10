@@ -53,41 +53,56 @@
 .MainP .textBar .text {
     /* margin: .6rem .8rem; */
     /* margin-bottom: 0; */
+    word-break: break-all;
+    box-sizing: border-box;
     padding: .6rem .8rem;
     padding-bottom: 0;
     text-align: left;
     text-indent: .48rem;
     font-size: .28rem;
-    height: 1.92rem;
+    height: 2.52rem;
 }
 
 .MainP .choice {
-    z-index: 1;
+    z-index: 0;
     position: absolute;
     left: 0;
     right: 0;
     top: 0;
-    bottom: 0;
-
+    bottom: 2.52rem;
 }
 
+
 .MainP .choice .optionList {
-    top: 0;
-    bottom: 28%;
     width: 100%;
-    height: fit-content;
-    position: absolute;
-    margin: auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    
 }
 
 .MainP .choice .option {
-    background-color: cadetblue;
+    background-color: rgba(88, 33, 132, .8);
     line-height: .7rem;
-    font-size: .25rem;
-    margin: 0 auto;
-    margin-bottom: .2rem;
+    height: .7rem;
+    font-size: .28rem;
+    margin: .2rem auto;
+    /* margin-bottom: .2rem; */
     width: 12rem;
     text-align: center;
+    position: relative;
+    border-radius: .2rem;
+}
+
+.MainP .choice .option:hover {
+    background-color: rgba(132, 44, 176, .8);
+}
+
+.MainP .choice.wait .option {
+    cursor: pointer;
 }
 
 .MainP .buttonBar {
@@ -245,15 +260,54 @@
     margin: 0;
     background-color: rgba(32, 32, 32, 0.2);
 }
-
-.MainP .historyView .close {
+.fixed-buttons-bar{
     position: absolute;
     right: .2rem;
     top: .2rem;
-    height: .6rem;
-    width: .6rem;
-    background-size: .6rem;
+    height: .5rem;
+    display: flex;
+    flex-direction: row;
+}
+.fixed-buttons-bar>*{
+    margin-inline: .1rem;
+}
+
+.close {
+    order: 99;
+    position: relative;
+    display: inline-block;
+    /* right: .2rem;
+    top: .2rem; */
+    height: .5rem;
+    width: .5rem;
+    overflow: hidden;
+    background-size: .39rem;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADB0lEQVRYR8XZSXLTQBQG4P9lBRQnSFFcQ7JkkHwTQhKmAAEWkHkeYAcEwjyuqOIQlqssW+YCsKUqrNiwgV38KLnsRGl3Sy3Jlr20WurP/2t1t2Sq+d8uMtr7AJ1i8FLFNr9ghJ9aI5hlxiaA34SxCfL84BeA8a6JmflKpVx6OwqjVw9WQFiP9P0jBP4FcCbyJQN81bVLb4pESnBh9wdUbQRzxNgVMIUiFTgmpgkKYVW/tUXgxVEga35rlcFrYt9EuOZY5usOMPzU/GCTgSVVw2GUOwkX9nkELBqpg+sDFoWs+s01Aq3qVOtEgkWUW4VTzRxSYAj16sEGCMv9v5KuO5bxKsuY9BrBOhgraW5GJXDQyCw46RgUk1ElyUw3KmXjpU6SKpzOqhWbYK9zdQfJyDw4rQTzINXp66/3WglmQSpvMqZpp2y80xkaqRJMQgI849qlF7E3V0pcJmB4UsxcNkOgcemSmQGXGRiDlFWOiTDlWOZ73bJG26Uag2IHiiSjzXLhciV4vCxKt0vh4dy4gQAVe8kOEMBN1zb3s5S2d07OEks3umKJbzmW+TwrMjPQ85vbAC0IHbcBjImbASJkRmYCqnBEmOY2zglPZp1yM9PtStl4ljbJ1MCY5KZc2/zQnajFx8fMyFRArxHsgDEvKesRLrLiLIOxIZY7bZLawDS4QSK1gArcIYDpXllVY8trBNIkAZ517dJe0phMBNbqwS4T5oQLaeF651T95hKBwvctJ6YgHWQscBA4DeQd1y49VSWpBA4Slwcpf+xUlJXBUxW79DFp3MQdjym3NMk+YNVvPSTwA3HMDQJ3vMFoLjJoSzIm+5AngEXgkpBEuOtY5pO+zYLnNx8BdF9MjpgmnbLxKU9ZVefWfHmSUWQnwVHgjibzemsBxNt9Kw7hXsUyH5NiIj0cZnJiop4CCWAyfAX8D8DpyEmF4hKSPCDPb/4E6Hy34SERXXYs4/MwxlzSNb16MA/CTqTdd/LqrQsg3gPoLAjzrmV8TbrQMI93/4YIXwn/aVP70n+OfBhghPU19QAAAABJRU5ErkJggg==);
+}
+
+.home {
+    order: 1;
+    position: relative;
+    display: inline-block;
+    /* right: .2rem;
+    top: .2rem; */
+    height: .5rem;
+    width: .5rem;
+    background-size: .5rem;
+    cursor: pointer;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-size: auto 100%;
+    -webkit-mask-size: auto 100%;
+    --home-svg: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjgzNDYyMzI3NTExIiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjE1MzgiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTkyNS44ODggMzk2LjhsLTMyLTI3LjcxMmMtNzguOTc2LTY2LjE3Ni0xODUuNi0xNTcuODg4LTMyMC0yNzMuMDg4bC0xMi44LTEwLjY4OGE3Ny4xODQgNzcuMTg0IDAgMCAwLTk4LjE3NiAwTDMxMS40ODggMjE1LjQ4OGExMjkyOTAuMTc2IDEyOTI5MC4xNzYgMCAwIDEtMjExLjIgMTc5LjJjLTE3LjA4OCAxMi44LTI1LjYgMzItMjUuNiA1My4zMTJ2NC4yODhjMi4xMTIgMzguNCAzNC4xMTIgNjYuMTEyIDcwLjQgNjYuMTEySDE5MnYzNTguNGMwIDI5Ljg4OCAyMy40ODggNTMuMzEyIDUzLjMxMiA1My4zMTJINDA5LjZhNTMuNDQgNTMuNDQgMCAwIDAgNDkuMDg4LTUzLjMxMnYtMTg1LjZjMC0xMi44IDguNTEyLTIxLjMxMiAyMS4zMTItMjEuMzEyaDY0YzEyLjggMCAyMS4zMTIgOC41MTIgMjEuMzEyIDIxLjMxMnYxODUuNmMwIDI5Ljg4OCAyMy40ODggNTMuMzEyIDUzLjM3NiA1My4zMTJoMTY0LjIyNEE1My40NCA1My40NCAwIDAgMCA4MzIgODc2LjhWNTE4LjRoNDYuOTEyYzM4LjQgMCA3MC40LTMyIDcwLjQtNzAuNCAwLTIxLjMxMi04LjUxMi0zOC40LTIzLjQyNC01MS4yeiIgcC1pZD0iMTUzOSI+PC9wYXRoPjwvc3ZnPg==);
+    mask-image: var(--home-svg);
+    -webkit-mask-image: var(--home-svg);
+    background-color: rgb(192, 192, 192);
 }
 
 .MainP .historyView::before {
@@ -279,11 +333,13 @@
     height: 9rem;
     overflow-y: auto;
 }
-.MainP .historyView .historyList::-webkit-scrollbar{
+
+.MainP .historyView .historyList::-webkit-scrollbar {
     width: .1rem;
 }
-.MainP .historyView .historyList::-webkit-scrollbar-thumb{
-    background: rgba(192,192,192,0.5); 
+
+.MainP .historyView .historyList::-webkit-scrollbar-thumb {
+    background: rgba(192, 192, 192, 0.5);
     border-radius: .1rem;
 }
 
@@ -291,12 +347,13 @@
     position: relative;
     height: 1.48rem;
     display: flex;
-    border-top:.02rem solid rgba(255,255,255,0.2);
+    border-top: .02rem solid rgba(255, 255, 255, 0.2);
 }
+
 .MainP .historyView .historyList .historySentence div {
-    background-color: rgba(255,255,255,0.1);
+    background-color: rgba(255, 255, 255, 0.1);
     font-size: .24rem;
-    padding: .1rem .2rem ;
+    padding: .1rem .2rem;
 }
 
 .MainP .historyView .historyList .historySentence .charaName {
@@ -305,19 +362,26 @@
     text-align: end;
     /* line-height: 1.28rem; */
 }
+
 .MainP .historyView .historyList .historySentence .text {
     height: 1.28rem;
     width: 9.3rem;
 }
+
 .MainP .historyView .historyList .historySentence .go {
     height: 1.28rem;
     width: .98rem;
-    border-left: .02rem solid rgba(255,255,255,0.2);
+    border-left: .02rem solid rgba(255, 255, 255, 0.2);
     line-height: 1.28rem;
 }
-.MainP .cover{
+
+.MainP .cover {
     position: absolute;
     height: 100%;
     width: 100%;
-    background-color: rgb(0,0,0);
+    background-color: rgb(0, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: .4rem;
 }

@@ -1,5 +1,5 @@
 
-    const pool = {};
+const pool = {};
 function FileInfo(packageKey, fileName, type, data) {
     // console.log("new FileInfo",arguments)
     if (typeof packageKey == 'string') {
@@ -25,21 +25,34 @@ function FileInfo(packageKey, fileName, type, data) {
     }
 }
 FileInfo.prototype.getSrc = function () {
-    // debugger;
-    return `data:${this.type};base64,${this.data}`;
+    return this.data;
 };
-FileInfo.__proto__.getDataFromPool = function ({ packageKey, fileName }) {
-    try {
-        // debugger;
-        return pool[packageKey][fileName].getSrc();
-    }
-    catch (err) {
-        return undefined;
-    }
-};
-FileInfo.__proto__.getFilePool = function () {
-    console.log("FileInfo pool")
-    return pool;
-}
+// FileInfo.__proto__.getDataFromPool = function ({ packageKey, fileName }) {
+//     try {
+//         // debugger;
+//         return pool[packageKey][fileName].getSrc();
+//     }
+//     catch (err) {
+//         return undefined;
+//     }
+// };
+// FileInfo.__proto__.getFilePool = function () {
+//     console.log("FileInfo pool")
+//     return pool;
+// }
 
+export const FilePool = {
+    getDataFromPool: function ({ packageKey, fileName }) {
+        try {
+            return pool[packageKey][fileName].getSrc();
+        }
+        catch (err) {
+            return undefined;
+        }
+    },
+    getFilePool: function () {
+        console.log("FileInfo pool1")
+        return pool;
+    }
+}
 export default FileInfo;

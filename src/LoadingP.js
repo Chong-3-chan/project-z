@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { getFileSrc, getPackagePath, file_map, objCopy } from "./data/extra-test-data.js"
+import { getFileSrc, getPackagePath, file_map, objCopy, package_map } from "./data/extra-test-data.js"
 // import { getFileSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
 import { pageContext } from './App.js'
-import PackageInfo from './class/package-info.js'
+import PackageInfo, { createPackageInfoList } from './class/package-info.js'
 import FileInfo from './class/file-info.js'
 import './LoadingP.css'
 import './LoadingP.style-04.css'
@@ -88,7 +88,8 @@ function LoadingP(props) {
   const [getLoadingProgress, setLoadingProgress] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
   const [getFile_total, setFile_total] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
   useEffect(() => {
-    setPackages(PackageInfo.createPackageInfoList(Object.fromEntries(Array.from(new Set((loadList.map(e => e.data)).flat(1).map(e => file_map[e].packageKey))).map(e => [e, getPackagePath(e)]))));
+    // packages:{}(key为packageName.value为new packageInfo())
+    setPackages(createPackageInfoList(Object.fromEntries(Array.from(new Set((loadList.map(e => e.data)).flat(1).map(e => file_map[e]?.packageKey))).map(e => [e, getPackagePath(e)]))));
     setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length })));
     console.log(getLoadingProgress(), setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length }))))
     setFile_total(eval(getLoadingProgress().map(e => e.total).join('+')) ?? 0);
@@ -116,7 +117,8 @@ function LoadingP(props) {
   useEffect(() => {
     if (phase != PHASE_LOADING) return;
     // console.log(file_total);
-    if (loadedFileNum === getFile_total()) setTimeout(() => setPhase(PHASE_LOADED), 2000);
+    const stop = false;
+    if (!stop && (loadedFileNum === getFile_total())) setTimeout(() => setPhase(PHASE_LOADED), 2000);
     // bs_api.start(createStyle({ width: `${getFile_total() ? (100 * loadedFileNum / getFile_total()) : (100)}%` }));
     bs_api.start(createStyle({ width: `${95 + (getFile_total() ? (5 * loadedFileNum / getFile_total()) : (5))}%` }));
   }, [loadedpartNum, phase])
@@ -168,23 +170,29 @@ function LoadingP(props) {
         const packageDownloadingPercent = Object.fromEntries(Object.keys(getPackages()).map(e => [e, 0]));
         Promise.allSettled(Object.entries(getPackages()).map(([packageName, e]) =>
           e.load((msg) => {
-            console.log(objCopy({ msg, packageName }), "mmm");
+            console.log(objCopy({ msg, packageName }), "now loading package");
             switch (msg.state) {
               case "downloading":
                 packageDownloadingPercent[packageName] = msg.percent;
                 bs_api.start(createStyle({ width: `${0.95 * Object.values(packageDownloadingPercent).reduce((a, b) => a + b) / Object.values(packageDownloadingPercent).length}%` }));
                 break;
               case "done":
-                console.log(msg.data);
-                Object.entries(msg.data).forEach(([fileName, data]) => {
-                  e.data[fileName] = new FileInfo(packageName, fileName, "image/*", data);
+                let fileNameList = Object.entries(file_map).filter(([, { packageKey }]) => packageKey == packageName).map(([, { fileName }]) => fileName);
+                console.log(msg.data, "done msgdata", package_map,fileNameList);
+                Object.entries(msg.data).forEach(([fileName, { type, data }]) => {
+                  // console.log(packageName, fileName, type, data,"new FileInfo");
+                  let index = fileNameList.indexOf(fileName);
+                  if (index != -1) {
+                    e.data[fileName] = new FileInfo(packageName, fileName, type, data);
+                    fileNameList.splice(index, 1);
+                  }
                 });
-                setDownloadedPackageNum(n => n + 1);
+                setDownloadedPackageNum(n => n + 1 + 0);
                 break;
               case "loading":
                 break;
               case "error":
-                console.log({
+                console.log("load error", {
                   ...(getErrorMsg() ?? {}),
                   packageLoading: { ...(getErrorMsg()?.packageLoading ?? {}), ...(Object.fromEntries([[packageName, msg.error.toString()]])) }
                 })
@@ -228,6 +236,7 @@ function LoadingP(props) {
   }, [phase])
   const [loadedPersentage, lp_api] = useSpring(() => ({ persentage: 0 }))
   function getLoadMessage() {
+    // removeChiLd 错误偶发！
     // console.log(loadingProgress)
     lp_api.start({ persentage: getFile_total() ? (100 * loadedFileNum / getFile_total()) : (100.0) })
     return <>
@@ -270,7 +279,7 @@ function LoadingP(props) {
             <div className={`title`}>{title}</div>
             {tips.length > 0 && <><animated.div className={'tip-title'} style={tipStyle}>{tips[tipNo].title}</animated.div>
               <animated.div className={'tip-text'} style={tipStyle}>{tips[tipNo].text}</animated.div></>}
-            <animated.div className={'message'} style={msgStyle}>{getLoadMessage()}</animated.div>
+            {/* <animated.div className={'message'} style={msgStyle}>{getLoadMessage()}</animated.div> */}
           </animated.div>
         </animated.div>
       </animated.div>

@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useContext, useRef, useMemo, useCallback } from 'react'
-import { getFileSrc, getCharaPicSrc } from "./data/extra-test-data.js"
+import { getFileSrc, getCharaPicSrc, wait } from "./data/extra-test-data.js"
 // import { getFileSrc, getCharaPicSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
-import { pageContext } from './App.js'
+import { getOptions, pageContext } from './App.js'
 import './MainP.css'
+import Sound, { player } from './tools/Sound.js'
+import { DBget, DBput } from './tools/IndexedDB-controller.js'
+import { globalSave } from './main.js'
 const test = [["Book1"], ["Book1", "1_0", "0010004"], [undefined, "0_0"], [undefined, "1_0"], [undefined, undefined, "0010004"]];
 let _mainPhase = "waiting";// place chara text done
 let _mainPhaseGO = () => { };
@@ -33,19 +36,22 @@ function liu(str, delay = 50, setter, callback) {
 }
 function getLiuText() {
     let endTextPushing = null;
-    return function LiuText(props) {
-        const { nextText, setNextText, textPhase, setTextPhase, onClick } = props;
+    return function ({ nextText, setNextText, textPhase, setTextPhase, onClick, playVoice }) {
         const [text, setText] = useState("");
         // console.log("textRender")
         useEffect(() => {
             // console.log("text:", textPhase, nextText, _mainPhase);
+            // debugger;
             switch (textPhase) {
                 case "waiting":
                     setText("");
-                    _mainPhase == "text" && nextText && setTextPhase("ready");
+                    _mainPhase == "text" && setTextPhase("ready");
                     return;
                 case "ready":
-                    endTextPushing = liu(nextText, undefined, setText,
+                    playVoice && playVoice();
+                    endTextPushing = liu(nextText,
+                        (10 - getOptions()["text_appearSpeed"]) * 12.5
+                        , setText,
                         () => {
                             // console.log("endTextPushing");
                             endTextPushing = null;
@@ -74,8 +80,7 @@ function getPlaceBox() {
     const style_op0 = createStyle(QStyle.OP_0);
     const style_op1 = createStyle(QStyle.OP_1);
     const style_BX = createStyle(QStyle.FT_BX("1rem"));
-    return function PlaceBox(props) {
-        const { nowPlace, lastPlace, placePhase, setPlacePhase } = props;
+    return function PlaceBox({ nowPlace, lastPlace, placePhase, setPlacePhase }) {
         const [placeStyle, ps_api] = useSpring(() => createStyle(style_op0, QStyle.CFG_B));
         useEffect(() => {
             console.log("placePhase", placePhase);
@@ -125,8 +130,7 @@ function getCGBox() {
     const style_op0 = createStyle(QStyle.OP_0);
     const style_op1 = createStyle(QStyle.OP_1);
     const style_BX = createStyle(QStyle.FT_BX("1rem"));
-    return function CGBox(props) {
-        const { nowCG, lastCG, CGPhase, setCGPhase } = props;
+    return function CGBox({ nowCG, lastCG, CGPhase, setCGPhase }) {
         const [CGStyle, ps_api] = useSpring(() => createStyle(style_op0, QStyle.CFG_B));
         useEffect(() => {
             console.log("CGPhase", CGPhase);
@@ -183,8 +187,7 @@ function getCharas() {
         if (!todo || !charaPhase.next[name]) charaPhase.next[name] = {};
         todo && (charaPhase.next[name][todo] = true);
     }
-    function Chara(props) {
-        const { charaId, now, last, phase, setPhase, nextPhase, isNow, isLast, toNextCharasActionPhase } = props;
+    function Chara({ charaId, now, last, phase, setPhase, nextPhase, isNow, isLast, toNextCharasActionPhase }) {
         console.log(now, last, isNow, isLast)
         const dat = isNow ? now : last;
         // console.log(dat)
@@ -284,8 +287,7 @@ function getCharas() {
             phaseSetter(nextPhase);
         }
     }
-    return function Charas(props) {
-        const { nowCharas, lastCharas, charasPhase, setCharasPhase } = props;
+    return function Charas({ nowCharas, lastCharas, charasPhase, setCharasPhase }) {
         console.log(nowCharas, lastCharas, charasPhase)
         useEffect(() => {
             console.log("charascharaActionsPhase", charasPhase, _mainPhase);
@@ -356,6 +358,7 @@ function getCharas() {
 }
 const Charas = getCharas();
 let historySentence = [];
+let autoPlayTimeout = null;
 function MainP(props) {
     const { pageAction: action, pageState } = useContext(pageContext);
     const { book: nowBook, story: nowStory, sentence: nowSentence } = action.getNow();
@@ -397,28 +400,38 @@ function MainP(props) {
     const [mainPhase, setMainPhase] = useState("waiting");
     const [newSentenceActiveFlag, setFlag] = useState(false);
     const [historyView, setHistoryView] = useState(false);
-    // const [newSentenceIsNext, setIsNext] = useState(false);
     const [getNewSentenceIsNext, setIsNext] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
-    const [coverFlag, setCoverFlag] = useState(false);
-    const [getCoverMission, setCoverMission] = ((e) => [() => e.current, (value) => e.current = value])(useRef(null));
+    const [coverData, setCoverData] = useState({ active: false });
     const [coverStyle, cs_api] = useSpring(() => createStyle(QStyle.OP_0, QStyle.CFG_ALQ));
+    const [choiceStyle, chs_api] = useSpring(() => createStyle(QStyle.OP_0, QStyle.CFG_ALQ));
+    const [choiceState, setChoiceState] = useState({ state: null });
     useEffect(() => {
-        if (coverFlag) {
+        if (coverData.active) {
             cs_api.start(createStyle(QStyle.OP_1, {
                 onRest: () => {
-                    if (getCoverMission()) {
-                        getCoverMission()();
-                        setCoverMission(null);
+                    if (coverData.mission) {
+                        coverData.mission();
+                        delete coverData.mission;
                     }
-                    setTimeout(() => cs_api.start(createStyle(QStyle.OP_0, {
-                        onRest: () => {
-                            setCoverFlag(false);
+                    coverData.notOut ? setTimeout(() => {
+                        if (coverData.onRest) {
+                            coverData.onRest();
+                            delete coverData.onRest;
                         }
-                    })), 1000);
+                    }, coverData.timeout ?? 2000)
+                        : setTimeout(() => cs_api.start(createStyle(QStyle.OP_0, {
+                            onRest: () => {
+                                if (coverData.onRest) {
+                                    coverData.onRest();
+                                    delete coverData.onRest;
+                                }
+                                setCoverData({ active: false });
+                            }
+                        })), coverData.timeout ?? 2000);
                 }
             }));
         }
-    }, [coverFlag]);
+    }, [coverData]);
     useEffect(() => {
         setLastSentence({
             ...nowSentence,
@@ -432,7 +445,7 @@ function MainP(props) {
         historySentence = [];
     }, [nowStory])
     useEffect(() => {
-        console.log(lastSentence, nowSentence, getNewSentenceIsNext());
+        console.log("sentence_", lastSentence, nowSentence, getNewSentenceIsNext());
         if (!getNewSentenceIsNext()) {
             setLastSentence({
                 ...nowSentence,
@@ -461,7 +474,7 @@ function MainP(props) {
         const mainPhaseList = [];
         let mainStep = 0;
         _mainPhaseGO = function () {
-            console.log(mainStep, mainPhaseList.length, mainPhaseList[mainStep])
+            console.log(mainStep, mainPhaseList.length, mainPhaseList[mainStep], "mainPhase")
             if (mainStep >= mainPhaseList.length) return;
             setMainPhase(_mainPhase = mainPhaseList[mainStep++]);
         };
@@ -477,36 +490,77 @@ function MainP(props) {
             setCharasPhase(_charasPhase = "waiting");
             mainPhaseList.push("chara");
         }
-        setNextText(nowSentence.text);
+        if (nowSentence.BGM != pageState.nowSound.BGM.audioFileKey) {
+            action.setBGM(nowSentence.BGM);
+        }
+        setNextText(nowSentence.text ?? "");
         setTextPhase("waiting");
         mainPhaseList.push("text");
         mainPhaseList.push("done");
         setFlag(true);
-        console.log(mainPhaseList);
-        _mainPhaseGO();
+        console.log(mainPhaseList, "go!", pageState.loadPhase);
+        if (pageState.loadPhase) {
+            setTimeout(() => {
+                _mainPhaseGO();
+            }, 2500);
+            // 加载后等候
+        }
+        else _mainPhaseGO();
+        if (!nowSentence.options) setChoiceState({ state: null });
     }, [nowSentence]);
     useEffect(() => {
         if (mainPhase == "done") {
             setLastSentence(nowSentence);
+            const old_readStory = globalSave.readStory;
+            !old_readStory.some(e => e == nowStory.id) && DBput("global", { key: "readStory", value: globalSave.readStory = [...old_readStory, nowStory.id] });
             // console.log(lastSentence, nowSentence,6666);
             setFlag(false);
+            if (nowSentence.options && !choiceState.state) {
+                setChoiceState({ state: "in" });
+            };
+            if (autoPlay) {
+                doAutoPlay();
+            }
         }
-        // do sth
-        // setTimeout(() => {
-        //     setLastSentence(nowSentence);
-        // }, 1000);
     }, [mainPhase]);
+    useEffect(() => {
+        if (choiceState.state == "in") {
+            if (autoPlay) {
+                choiceState.autoPlay = true;
+                setAutoPlay(false);
+            }
+            chs_api.start(createStyle(QStyle.OP_1, { onRest: () => setChoiceState({ ...choiceState, state: "wait" }) }));
+        }
+        else if (choiceState.state == "out") {
+            choiceState.autoPlay && setAutoPlay(true);
+            chs_api.start(createStyle(QStyle.OP_0, QStyle.CFG_AQ, { onRest: () => ((choiceState.onRest ?? (() => { }))(), setChoiceState({ state: null })) }));
+        }
+        else if (choiceState.state == null) {
+            chs_api.set(createStyle(QStyle.OP_0));
+        }
+    }, [choiceState.state])
     const [autoPlay, setAutoPlay] = useState(false);
-    useEffect(() => { autoPlay ? startAutoPlay() : stopAutoPlay(); }, [autoPlay]);
+    useEffect(() => { autoPlay ? mainPhase=="done"&&doAutoPlay() : stopAutoPlay(); }, [autoPlay]);
     const toNextSentence = useCallback(
         (() => {
-            console.log("textPhase", textPhase)
+            console.log("textPhase", textPhase, { placePhase, CGPhase })
             if (textPhase == "done" && placePhase == "done" && CGPhase == "done") {
-                if (action.toNextSentence()) {
+                const flag = action.toNextSentence();
+                if (flag === true) {
                     historySentence.push(action.getNow().sentence);
                     console.log('history', historySentence);
+                    // player.setVolume(pageState.options.volume_ALL * pageState.options.volume_effect);
+                    player.play('https://chong-chan.cn/resource/extra_test_active/default/02510.ogg');
                     setIsNext(true);
-                    if (autoPlay) startAutoPlay();
+                }
+                else if (flag.end) {
+                    setCoverData({
+                        active: true,
+                        onRest: () => action.setActivePage("home"),
+                        text: flag.end,
+                        notOut: true,
+                        timeout: 5000
+                    });
                 }
             }
             else {
@@ -520,29 +574,62 @@ function MainP(props) {
                     setCGPhase("done");
                 }
             }
+            stopAutoPlay();
         })
         , [textPhase, placePhase, CGPhase, autoPlay])
-    const [startAutoPlay, stopAutoPlay] = ((e) => [
-        () => { e.current && clearInterval(e.current); e.current = setInterval(toNextSentence, 4000) },
-        () => { e.current && clearInterval(e.current); e.current = null; }
+
+    const [doAutoPlay, stopAutoPlay] = ((e) => [
+        () => {
+            const timeout =getOptions()["text_autoSpeed"] * (200 + 8 * nowSentence.text.length);
+            e.current && clearTimeout(e.current); e.current = setTimeout(() => {
+                toNextSentence();
+                e.current = null;
+            }, timeout);
+        },
+        () => { e.current && clearTimeout(e.current); e.current = null; }
     ])(useRef(null));
     const getTextBar = useCallback(
         (() => (
             <div className='textBar'>
                 <div className='buttonBar'>
-                    <div className='button' onClick={() => { setAutoPlay(!autoPlay) }} style={autoPlay ? { color: "red" } : {}}>{"auto"}</div>
-                    <div className='button' onClick={() => setHistoryView(true)}>{"history"}</div>
+                    <div className='button' onClick={() => {
+                        action.callSaveP();
+                    }}>
+                        {"保存"}
+                    </div>
+                    <div className='button' onClick={() => {
+                        action.callLoadP();
+                    }}>
+                        {"读取"}
+                    </div>
+                    <div className='button' onClick={() => {
+                        autoPlay && setAutoPlay(false);
+                        action.callOptionsP();
+                    }}>
+                        {"设置"}
+                    </div>
+                    <div className='button' onClick={choiceState.state ? () => { } : () => { setAutoPlay(!autoPlay) }} style={autoPlay ? { color: "red" } : {}}>
+                        {/* {"auto"} */}
+                        {"自动"}
+                    </div>
+                    <div className='button' onClick={() => setHistoryView(true)}>
+                        {"历史"}
+                        {/* {"history"} */}
+                    </div>
                 </div>
                 <div className='charaName'>{nowSentence.charaName}</div>
                 <LiuText
                     nextText={nextText} setNextText={setNextText}
-                    textPhase={textPhase} setTextPhase={setTextPhase} onClick={toNextSentence} />
+                    textPhase={textPhase} setTextPhase={setTextPhase}
+                    playVoice={nowSentence.voice && (() => action.setVoice(nowSentence.voice))}
+                    onClick={nowSentence.options ? () => { } : () => toNextSentence()} />
             </div>
         )),
         [nextText, textPhase, nowSentence.charaName, autoPlay]
     )
     return (
-        ((nowSentence) => <div className={"MainP"}>
+        ((nowSentence) => <div className={"MainP"} onClick={() =>
+            player.play('https://chong-chan.cn/resource/extra_test_active/default/02510.ogg')}>
             {<PlaceBox
                 nowPlace={nowSentence.place} lastPlace={lastSentence.place}
                 placePhase={placePhase} setPlacePhase={setPlacePhase}
@@ -556,38 +643,52 @@ function MainP(props) {
                 CGPhase={CGPhase} setCGPhase={setCGPhase}
             />}
             {getTextBar()}
-            {nowSentence.options &&
-                <div className='choice'>
+            {choiceState.state &&
+                <animated.div className={`choice ${choiceState.state}`} style={choiceStyle}>
                     <div className='optionList'>
-                        {nowSentence.options.map((e, i) => <div className='option'
-                            onClick={() => {
-                                e.to && action.setTo(e.to);
-                                e.jump ? action.setNext(undefined, undefined, e.jump) : toNextSentence.current();
+                        {nowSentence.options.map((e, i) => <div className={`option`}
+                            onClick={choiceState.state != "wait" ? () => { } : () => {
+                                setChoiceState({
+                                    ...choiceState,
+                                    state: "out",
+                                    onRest: () => {
+                                        e.to ? action.setTo(e.to) : action.setTo(null);
+                                        e.jump ? action.setNext(undefined, undefined, e.jump) : toNextSentence();
+                                    }
+                                })
                             }} key={i}>{e.text}</div>)}
                     </div>
-                </div>}
+                </animated.div>}
             {historyView &&
                 <div className='historyView'>
-                    <div className='close' onClick={() => setHistoryView(false)}></div>
                     <div className='historyList'>
                         {historySentence.map((e, i) => (<div className='historySentence' key={i}>
                             <div className='charaName'>{e.charaName}</div>
                             <div className='text'>{e.text}</div>
                             <div className='go' onClick={() => {
-                                setCoverMission(() => {
-                                    historySentence.splice(i);
-                                    action.setNext(undefined, undefined, e.id);
-                                    setHistoryView(false);
+                                setCoverData({
+                                    active: true,
+                                    mission: () => {
+                                        historySentence.splice(i);
+                                        action.setNext(undefined, undefined, e.id);
+                                        setHistoryView(false);
+                                    }
                                 });
-                                setCoverFlag(true);
                             }}>⬅跳转</div>
                         </div>))
                         }</div>
+                    <div className='fixed-buttons-bar'>
+                        <div className='close' onClick={() => setHistoryView(false)}></div>
+                    </div>
                 </div>}
-            {coverFlag && <animated.div className="cover" style={coverStyle}></animated.div>}
-            {<div className='testBar'>
+            {coverData.active && <animated.div className="cover" style={coverStyle}>
+                {coverData.text ?? ""}
+            </animated.div>}
+            {/* {<div className='testBar'>
+                <div className='testButton' onClick={() => action.setActivePage("home")}>go Home</div>\
+            </div>} */}
+            {/* {<div className='testBar'>
                 {test.map((e, i) => <div className='testButton' onClick={() => action.setNext(...e)} key={i}>测试{i} {JSON.stringify(e)}</div>)}
-                <div className='testButton' onClick={() => action.setActivePage("home")}>go Home</div>
                 {<div className='testButton' onClick={toNextSentence}>go</div>}
                 <div className='testText'>{JSON.stringify(pageState.now)}{nowSentence.charaName} {nowSentence.text}</div>
                 <div className='testText'>{JSON.stringify(nowSentence)}</div>
@@ -596,7 +697,7 @@ function MainP(props) {
                         e.to && action.setTo(e.to);
                         e.jump ? action.setNext(undefined, undefined, e.jump) : toNextSentence.current();
                     }} key={i}>{JSON.stringify(e)}</div>)}
-            </div>}
+            </div>} */}
         </div>)(newSentenceActiveFlag ? nowSentence : lastSentence)
     )
 }

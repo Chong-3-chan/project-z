@@ -1,85 +1,9 @@
-import { objCopy } from "../data/extra-test-data";
-import FileInfo from "./file-info";
+import { objCopy, packageSampleUsing } from "../data/extra-test-data";
+import { DBput, DBget } from "../tools/IndexedDB-controller";
+import { message_getPackage } from "../tools/message-helper";
+// import FileInfo from "./file-info";
 const ppool = new Map();
-let db, openDB_callbackList = [];
-function openDB() {
-    let re = indexedDB.open("weimu-fileInfo");
-    function openDB_callback() { openDB_callbackList.forEach(e => e()); openDB_callbackList = []; };
-    re.onupgradeneeded = function (event) {
-        let db = event.target.result;
-        let objectStore = db.createObjectStore("package", { keyPath: "resourcePath" });
-        objectStore.createIndex("resourcePath", "resourcePath", { unique: true });
-    };
-    re.onsuccess = (e) => {
-        db = e.target.result
-        console.log('success', db);
-        openDB_callback();
-    }
-    re.onerror = (e) => console.log('error', e);
-}
-openDB();
-function DBput(line) {
-    if (!db) openDB_callbackList.push(() => DBput(line));
-    else {
-        let request = db.transaction(["package"], 'readwrite')
-            .objectStore("package")
-            .put(line);
-        request.onsuccess = function (event) {
-            console.log('数据写入成功', line);
-        };
-        request.onerror = function (event) {
-            console.log('数据写入失败');
-        }
-    }
-}
-function DBget(path) {
-    function get(resolve, reject) {
-        let request = db.transaction(['package']).objectStore('package').get(path);
-        request.onerror = function (event) {
-            console.log('数据读取失败');
-            reject(event);
-        };
-        request.onsuccess = function (event) {
-            if (request.result) {
-                console.log('数据读取成功', request.result)
-            } else {
-                console.log('未获得数据记录');
-            }
-            resolve(request.result);
-        };
-    }
-    return new Promise((resolve, reject) => {
-        if (!db)
-            openDB_callbackList.push(() => get(resolve, reject));
-        else {
-            get(resolve, reject);
-        }
-    })
-}
-// const test_data = [{ resourcePath: "111", data: "123" }];
-// setTimeout(() => {
-//     {
-//         let transaction = db.transaction(["package"], "readwrite");
-//         // 在所有数据添加完毕后的处理
-//         transaction.oncomplete = function (event) {
-//             alert("All done!");
-//         };
-//         transaction.onerror = function (event) {
-//             // 不要忘记错误处理！
-//             console.log(event.target.result)
-//             alert("error");
-//         };
 
-//         let objectStore = transaction.objectStore("package");
-//         test_data.forEach(function (data) {
-//             let request = objectStore.add(data);
-//             request.onsuccess = function (event) {
-//                 // event.target.result === customer.ssn;
-//                 console.log(event.target.result, "eeeee")
-//             };
-//         });
-//     }
-// }, 100)
 function PackageInfo(prop) {
     if (typeof prop == "string") {
         console.log("piob", prop)
@@ -92,6 +16,7 @@ function PackageInfo(prop) {
         }
         const newPackageInfo = {
             resourcePath: path,
+            key: path.slice(path.lastIndexOf('/') + 1, path.lastIndexOf('.')),
             state: "waiting",
             data: {}
         };
@@ -115,28 +40,31 @@ PackageInfo.prototype.load = function (doSthWithMessage) {
             resolve("hit");
             return;
         }
-        const fromDB = await DBget(this.resourcePath);
-        console.log("dt", objCopy(fromDB), ppool)
-        if (fromDB) {
-            for (let i in fromDB) {
-                this[i] = fromDB[i];
+        const fromHelper = packageSampleUsing ? undefined : (await new Promise((resolve, reject) => message_getPackage({ packageKey: this.key }, e => resolve(Object.keys(e?.data).length ? e : undefined))));
+        const fromDB = await DBget("package", this.resourcePath);
+        // debugger;
+        console.log("dt", objCopy(fromHelper), objCopy(fromDB), ppool)
+        const from = fromHelper ?? fromDB;
+        if (from) {
+            for (let i in from) {
+                this[i] = from[i];
             };
             doSthWithMessage({
                 state: "done",
-                total: Object.keys(fromDB.data).length,
-                data: Object.fromEntries(Object.entries(fromDB.data).map(([i, e]) => [i, e.data]))
+                total: Object.keys(from.data).length,
+                data: Object.fromEntries(Object.entries(from.data).map(([i, e]) => [i, { type: e.type, data: e.data }]))
             });
             resolve("hit DB");
             return;
         }
         let worker = new Worker(new URL('./../worker/worker-getZip.js', import.meta.url));
-        worker.postMessage(this.resourcePath);
+        worker.postMessage({path:this.resourcePath});
         worker.onmessage = (e) => {
             const msg = e.data;
             for (let key in msg) this[key] = msg[key];
             doSthWithMessage(msg);
             if (this.state == "done") {
-                DBput(this);
+                DBput("package", this);
                 resolve("get");
             }
             else if (this.state == "error") {
@@ -145,7 +73,7 @@ PackageInfo.prototype.load = function (doSthWithMessage) {
         };
     })
 }
-PackageInfo.__proto__.createPackageInfoList = function (key_path_map) {
+export function createPackageInfoList(key_path_map) {
     const P = {};
     console.log(key_path_map, 'km');
     Object.entries(key_path_map).forEach(([i, e]) => {
@@ -153,8 +81,8 @@ PackageInfo.__proto__.createPackageInfoList = function (key_path_map) {
     });
     return P;
 }
-PackageInfo.__proto__.getPackagePool = function () {
-    console.log("package pool")
+export function getPackagePool() {
+    console.log("package pool1")
     return ppool;
 }
 export default PackageInfo;

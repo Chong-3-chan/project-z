@@ -1,0 +1,194 @@
+/* .SaveP>*{
+    background-color: rgba(255, 255, 255, 0.2);
+} */
+.SaveP {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    opacity: 1;
+}
+.SaveP.out>*{
+    transition: opacity .2s; 
+    opacity: 0;
+}
+.SaveP .saveFile>.empty{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    font-size: .3rem;
+}
+.SaveP .newSave::-webkit-scrollbar{
+    width: .1rem;
+    background-color: transparent;
+}
+.SaveP .newSave::-webkit-scrollbar-thumb{
+    background: rgba(192,192,192,0.2); 
+    border-radius: .1rem;
+}
+.SaveP .newSave, .newSave *{
+    box-sizing: border-box;
+}
+.SaveP .newSave,.SaveP .saveFile-list {
+    width: 6.2rem;
+    animation: fade-in .5s ease-in-out;
+}
+.SaveP .newSave>.text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: .28rem;
+    height: 1.6rem;
+    position: relative;
+}
+.SaveP .newSave>.saveFile{
+    width: 6rem;
+    position: relative;
+    display: flex;
+    border-top: .01rem solid rgba(192,192,192,0.5);
+    border-bottom: .01rem solid rgba(192,192,192,0.5);
+    padding: .2rem;
+    margin: 0 .1rem;
+    height: 1.6rem;
+    overflow: hidden;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+/* .newSave>.saveFile:not(:first-child){
+    margin-top: .05rem;
+} */
+.SaveP .newSave>.saveFile>.id{
+    position: absolute;
+    display: flex;
+    left: 0;top:0;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8rem;
+    height: 100%;
+    width: 100%;
+    color: rgba(192,192,192,0.3);
+}
+.SaveP .newSave>.saveFile>.head{
+    /* position: absolute; */
+    display:inline-block;
+    border: .01rem solid rgba(192,192,192,0.5);
+    width: 1.2rem;height: 1.2rem;
+    text-align: center;
+    line-height: 1.2rem;
+    font-size: .3rem;
+}
+.SaveP .newSave>.saveFile>.text{
+    /* position: absolute; */
+    /* border: .01rem solid white; */
+    margin: 0 .2rem;
+    width: 4rem;height:.6rem;
+    font-size: .28rem;
+    line-height: .6rem;
+}
+.SaveP .newSave>.saveFile>.time{
+    /* position: absolute; */
+    /* border: .01rem solid white; */
+    margin: .1rem .2rem;
+    width: 4rem;height: .3rem;
+    font-size: .2rem;
+    line-height: .4rem;
+}
+.SaveP .saveFile-list {
+    height: 8rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    animation: fade-in .5s ease-in-out;
+}
+
+.SaveP .saveFile-list::-webkit-scrollbar {
+    width: .1rem;
+    background-color: transparent;
+}
+
+.SaveP .saveFile-list::-webkit-scrollbar-thumb {
+    background: rgba(192, 192, 192, 0.2);
+    border-radius: .1rem;
+}
+
+.SaveP .saveFile-list,
+.SaveP .saveFile-list * {
+    box-sizing: border-box;
+}
+
+.SaveP .saveFile-list {
+    width: 6.2rem;
+}
+
+.SaveP .saveFile-list>.saveFile {
+    width: 6rem;
+    position: relative;
+    display: flex;
+    border-top: .01rem solid rgba(192, 192, 192, 0.5);
+    border-bottom: .01rem solid rgba(192, 192, 192, 0.5);
+    padding: .2rem;
+    margin: 0 .1rem;
+    height: 1.6rem;
+    overflow: hidden;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: flex-start;
+    cursor: pointer;
+}
+
+.SaveP .saveFile-list>.saveFile:not(:first-child) {
+    margin-top: .05rem;
+}
+
+.SaveP .saveFile-list>.saveFile:hover,
+.SaveP .saveFile-list>.saveFile.selected {
+    background-color: rgba(192, 192, 192, 0.2);
+    border-color: transparent;
+}
+.SaveP .saveFile-list>.saveFile>.id {
+    position: absolute;
+    display: flex;
+    left: 0;
+    top: 0;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6rem;
+    height: 100%;
+    width: 100%;
+    color: rgba(192, 192, 192, 0.3);
+}
+
+.SaveP .saveFile-list>.saveFile>.head {
+    /* position: absolute; */
+    display: inline-block;
+    border: .01rem solid rgba(192, 192, 192, 0.5);
+    width: 1.2rem;
+    height: 1.2rem;
+    text-align: center;
+    line-height: 1.2rem;
+    font-size: .3rem;
+}
+
+.SaveP .saveFile-list>.saveFile>.text {
+    /* position: absolute; */
+    /* border: .01rem solid white; */
+    margin: 0 .2rem;
+    width: 4rem;
+    height: .6rem;
+    font-size: .28rem;
+    line-height: .6rem;
+}
+
+.SaveP .saveFile-list>.saveFile>.time {
+    /* position: absolute; */
+    /* border: .01rem solid white; */
+    margin: .1rem .2rem;
+    width: 4rem;
+    height: .3rem;
+    font-size: .2rem;
+    line-height: .4rem;
+}

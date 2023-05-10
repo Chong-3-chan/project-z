@@ -1,98 +1,188 @@
-// export function objCopy(obj) {
-//     if (obj == null) { return null }
-//     var result = Array.isArray(obj) ? [] : {};
-//     for (let key in obj) {
-//         if (obj.hasOwnProperty(key)) {
-//             if (typeof obj[key] === 'object') {
-//                 result[key] = objCopy(obj[key]);
-//             } else {
-//                 result[key] = obj[key];
-//             }
-//         }
-//     }
-//     return result;
-// }
-export function objCopy(target) {
-    const map = new WeakMap()
-
-    function isObject(target) {
-        return (typeof target === 'object' && target) || typeof target === 'function'
-    }
-
-    function clone(data) {
-        if (!isObject(data)) {
-            return data
-        }
-        if ([Date, RegExp].includes(data.constructor)) {
-            return new data.constructor(data)
-        }
-        if (typeof data === 'function') {
-            return new Function('return ' + data.toString())()
-        }
-        const exist = map.get(data)
-        if (exist) {
-            return exist
-        }
-        if (data instanceof Map) {
-            const result = new Map()
-            map.set(data, result)
-            data.forEach((val, key) => {
-                if (isObject(val)) {
-                    result.set(key, clone(val))
-                } else {
-                    result.set(key, val)
-                }
-            })
-            return result
-        }
-        if (data instanceof Set) {
-            const result = new Set()
-            map.set(data, result)
-            data.forEach(val => {
-                if (isObject(val)) {
-                    result.add(clone(val))
-                } else {
-                    result.add(val)
-                }
-            })
-            return result
-        }
-        const keys = Reflect.ownKeys(data)
-        const allDesc = Object.getOwnPropertyDescriptors(data)
-        const result = Object.create(Object.getPrototypeOf(data), allDesc)
-        map.set(data, result)
-        keys.forEach(key => {
-            const val = data[key]
-            if (isObject(val)) {
-                result[key] = clone(val)
+export function objCopy(obj) {
+    if (obj == null) { return null }
+    var result = Array.isArray(obj) ? [] : {};
+    for (let key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            if (typeof obj[key] === 'object') {
+                result[key] = objCopy(obj[key]);
             } else {
-                result[key] = val
+                result[key] = obj[key];
             }
-        })
-        return result
+        }
     }
-
-    return clone(target)
+    return result;
 }
+export function wait(timeout) {
+    return new Promise((resolve, reject) => {
+        setTimeout(() => {
+            resolve()
+        }, timeout);
+    })
+}
+// export function objCopy(target) {
+//     const map = new WeakMap()
+
+//     function isObject(target) {
+//         return (typeof target === 'object' && target) || typeof target === 'function'
+//     }
+
+//     function clone(data) {
+//         if (!isObject(data)) {
+//             return data
+//         }
+//         if ([Date, RegExp].includes(data.constructor)) {
+//             return new data.constructor(data)
+//         }
+//         if (typeof data === 'function') {
+//             return new Function('return ' + data.toString())()
+//         }
+//         const exist = map.get(data)
+//         if (exist) {
+//             return exist
+//         }
+//         if (data instanceof Map) {
+//             const result = new Map()
+//             map.set(data, result)
+//             data.forEach((val, key) => {
+//                 if (isObject(val)) {
+//                     result.set(key, clone(val))
+//                 } else {
+//                     result.set(key, val)
+//                 }
+//             })
+//             return result
+//         }
+//         if (data instanceof Set) {
+//             const result = new Set()
+//             map.set(data, result)
+//             data.forEach(val => {
+//                 if (isObject(val)) {
+//                     result.add(clone(val))
+//                 } else {
+//                     result.add(val)
+//                 }
+//             })
+//             return result
+//         }
+//         const keys = Reflect.ownKeys(data)
+//         const allDesc = Object.getOwnPropertyDescriptors(data)
+//         const result = Object.create(Object.getPrototypeOf(data), allDesc)
+//         map.set(data, result)
+//         keys.forEach(key => {
+//             const val = data[key]
+//             if (isObject(val)) {
+//                 result[key] = clone(val)
+//             } else {
+//                 result[key] = val
+//             }
+//         })
+//         return result
+//     }
+
+//     return clone(target)
+// }
+const argsStr_to_arr = (function () {
+    const END_OF_ARR = Symbol("END_OF_ARR");
+    return function argsStr_to_arr(argsStr) {
+        const arr = [];
+        let i = 0;
+        // console.log(argsStr);
+        function getNextArg() {
+            if (argsStr[i] == ',') i++;
+            if (argsStr.length <= i) return END_OF_ARR;
+            if (argsStr[i] == '[') {
+                i++;
+                const nextArg_arr = [];
+                let newArg;
+                while ((newArg = getNextArg()) != END_OF_ARR) nextArg_arr.push(newArg);
+                return nextArg_arr;
+            }
+            else if (argsStr[i] == ']') {
+                i++;
+                return END_OF_ARR;
+            }
+            else {
+                let nextArg_str = "";
+                while (argsStr.length > i) {
+                    if (argsStr[i] == ',') {
+                        i++;
+                        return nextArg_str;
+                    }
+                    if (argsStr[i] == ']') {
+                        return nextArg_str;
+                    }
+                    else nextArg_str += argsStr[i++];
+                }
+                return nextArg_str;
+            }
+        }
+        let newArg;
+        while ((newArg = getNextArg()) != END_OF_ARR) arr.push(newArg);
+        return arr;
+    }
+})();
 // export const resource_base_path = "http://projecta-resource.com/extra_test_active/";
 // export const resource_base_path = "http://pixiv.miunachan.top/extra_test_active/";
 export const resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
 export const DEFAULT_PAGESTATE = {
 
 };
-export const packageSampleUsing = false;
+export const packageSampleUsing = !!false;
 export const package_map = !packageSampleUsing ? {} : {
     "HBG": "package/HBG.zip",
     "P35_37": "package/P35_37.zip",
     "CG01_04": "package/CG01_04.zip",
     "C12": "package/C12.zip",
     "C04": "package/C04.zip",
+    "BGM": "package/sound.zip"
 }
 export function getPackagePath(key) {
     return resource_base_path + package_map[key];
 }
 
+export const information_map = {
+    "info_1": {
+        id: "info_1",
+        title: "档案1档案1档案1档案1档案1档案1",
+        check: [],
+        data: [
+            {
+                type: "pic",
+                fileKey: "_H_BG_0"
+            },
+            {
+                type: "text",
+                text: "有一个段落。"
+            },
+            {
+                type: "text",
+                text: "还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。还有一个段落。"
+            }
+        ]
+    },
+    "info_2": {
+        id: "info_2",
+        title: "档案2",
+        check: ["1_0"],
+        data: [
+            {
+                type: "text",
+                text: "有一个段落。"
+            },
+            {
+                type: "text",
+                text: "还有一个段落。"
+            }
+        ]
+    }
+}
+
 export const file_map = !packageSampleUsing ? {} : {
+    BGM_01: { packageKey: 'sound', fileName: 'bgm_0202_loop.ogg' },
+    BGM_02: { packageKey: 'sound', fileName: 'bgm_0208_loop.ogg' },
+    SOUND_T_1: { packageKey: 'sound', fileName: 'aiy050114640.ogg' },
+    SOUND_T_2: { packageKey: 'sound', fileName: 'aiy050114680.ogg' },
+
     _H_BG_0: { packageKey: 'HBG', fileName: 'bg_0.png' },
     _H_BG_1: { packageKey: 'HBG', fileName: 'bg_1.png' },
 
@@ -333,7 +423,7 @@ function getCharaNameById(id) {
     return chara_map[id].name;
 }
 export const preload_group = {
-    _H: { name: "首页资源", data: ['_H_BG_0', '_H_BG_1'] },
+    _H: { name: "首页资源", data: ['_H_BG_0'] },
     _P_INDOOR: { name: "INDOOR场景", data: ['_P_INDOOR_1', '_P_INDOOR_2', '_P_INDOOR_3', '_P_INDOOR_4', '_P_INDOOR_5', '_P_INDOOR_6', '_P_INDOOR_7'] },
     _P_OUTDOOR: { name: "OUTDOOR场景", data: ['_P_OUTDOOR_1', '_P_OUTDOOR_2'] },
     _CG_01: { name: "01CG", data: ['_CG_01_01', '_CG_01_02'] },
@@ -341,13 +431,13 @@ export const preload_group = {
     _C_04: { name: "04人物立绘", data: ['_C_04_02', '_C_04_03', '_C_04_04', '_C_04_05', '_C_04_06', '_C_04_07', '_C_04_12', '_C_04_13', '_C_04_21', '_C_04_22', '_C_04_23', '_C_04_25', '_C_04_27', '_C_04_31', '_C_04_32', '_C_04_33', '_C_04_41', '_C_04_42', '_C_04_43', '_C_04_44', '_C_04_45', '_C_04_50', '_C_04_54', '_C_04_55', '_C_04_56'] },
     _C_12: { name: "12人物立绘", data: ['_C_12_01', '_C_12_01Y', '_C_12_02', '_C_12_02Y', '_C_12_03', '_C_12_03Y', '_C_12_04', '_C_12_04Y', '_C_12_05', '_C_12_05Y', '_C_12_06', '_C_12_07', '_C_12_07Y', '_C_12_08', '_C_12_11', '_C_12_11Y', '_C_12_12', '_C_12_13', '_C_12_13Y', '_C_12_21', '_C_12_21Y', '_C_12_22', '_C_12_23', '_C_12_23Y', '_C_12_24', '_C_12_25', '_C_12_25Y', '_C_12_26', '_C_12_27', '_C_12_27Y', '_C_12_28', '_C_12_31', '_C_12_32'] }
 }, PL_G = preload_group;
-import FileInfo from "../class/file-info";
 import PackageInfo from "../class/package-info";
+import FileInfo, { FilePool } from "../class/file-info";
 export function getFileSrc(file_map_KEY) {
     // if (file_map_KEY in file_map) return resource_base_path + file_map[file_map_KEY];
-    console.log('pool', FileInfo.getFilePool());
-    if (file_map_KEY in file_map) return FileInfo.getDataFromPool(file_map[file_map_KEY]);
-    return "";
+    // console.log('pool', FilePool.getFilePool());
+    if (file_map_KEY in file_map) return FilePool.getDataFromPool(file_map[file_map_KEY]);
+    return "https://chong-chan.cn/resource/extra_test_active/default/error.png";
 }
 export function getCharaPicSrc(charaName, style) {
     return getFileSrc(chara_map[charaName].pic[style.toString()]);
@@ -630,30 +720,29 @@ export const tips_group = {
 export const bookIds = !packageSampleUsing ? [] : ["sample"]
 export const b = !packageSampleUsing ? {} : {
     "sample": (`=BOOK:sample
->data_key=0_0,1_0,1_1,1_2,1_3
 >start=0_0
 >end=[1_1,在1_1结束],[1_2,在1_2结束],[1_3,在1_3结束]
 >default_style=style-00`)
 };
 export const s = !packageSampleUsing ? {} : {
-    "sample": [
-        `=STORY:0_0
+    "sample": {
+        "0_0": `=STORY:0_0
 >title=0_0的标题
 >to=1_0
 >end=0
 >tips=home
 ~0:
-@?##「Hello world」
-@##睁开了眼。##setPlace[_P_INDOOR_4]
+@?##「Hello world」##BGM[BGM_01]##voice[SOUND_T_1]
+@##睁开了眼。##setPlace[_P_INDOOR_4]##BGM[BGM_02]##voice[SOUND_T_2]
 @##闭上了眼。##setPlace[null]
 ~0 end`,
-        `=STORY:1_0
+        "1_0": `=STORY:1_0
 >title=1_0的标题标题标题
 >to=1_1
 >end=1,2,3
 ~0:
 @##还未睁开双眼，已经闻到一股食物的香气。
-@##...哎呀，好像睡过了。##setPlace[_P_INDOOR_6]
+@##...哎呀，好像睡过了。##setPlace[_P_INDOOR_6]##BGM[SOUND_T_1]
 @##转过头来看，发现梅尔斯正在做早餐。
 @12##...##chara[12,22,a_1]##chara[04,12,a_3]
 @12##嗯哼，醒了吗？##chara[12,08,a_1]
@@ -674,7 +763,7 @@ export const s = !packageSampleUsing ? {} : {
 ~3:
 @##今天就当阿宅吧。
 ~3 end`,
-        `=STORY:1_1
+        "1_1": `=STORY:1_1
 >end=0
 >style=style-12
 ~0:
@@ -687,7 +776,7 @@ export const s = !packageSampleUsing ? {} : {
 @##省略。##setPlace[_P_INDOOR_2]
 @##省略。##setPlace[_P_INDOOR_3]
 ~0 end`,
-        `=STORY:1_2
+        "1_2": `=STORY:1_2
 >end=0
 >style=style-04
 ~0:
@@ -700,12 +789,12 @@ export const s = !packageSampleUsing ? {} : {
 @##省略。##setPlace[_P_INDOOR_2]
 @##省略。##setPlace[_P_INDOOR_3]
 ~0 end`,
-        `=STORY:1_3
+        "1_3": `=STORY:1_3
 >end=0
 ~0:
 @##省略##setPlace[_P_INDOOR_4]
 ~0 end`,
-    ]
+    }
 };
 // const s_ = s.map(e => e.split('\n'))
 
@@ -731,11 +820,11 @@ function getBook() {
     const dataLineType = { '=': "name", '>': "setAttr", '@': "sentence", '~': "paragraph" }
     const attrSetters = {
         "BOOK": {
-            "data_key": function (keys) {
-                for (let i = 0; i < keys.length; i++) {
-                    this.data[keys[i]] = STORY[keys[i]];
-                }
-            },
+            // "data_key": function (keys) {
+            //     for (let i = 0; i < keys.length; i++) {
+            //         this.data[keys[i]] = STORY[keys[i]];
+            //     }
+            // },
             "start": function (arr) {
                 this["start"] = arr[0];
             },
@@ -771,44 +860,6 @@ function getBook() {
                 this["tips"] = arr;
             }
         },
-    }
-    const END_OF_ARR = Symbol("END_OF_ARR");
-    function argsStr_to_arr(argsStr) {
-        const arr = [];
-        let i = 0;
-        // console.log(argsStr);
-        function getNextArg() {
-            if (argsStr[i] == ',') i++;
-            if (argsStr.length <= i) return END_OF_ARR;
-            if (argsStr[i] == '[') {
-                i++;
-                const nextArg_arr = [];
-                let newArg;
-                while ((newArg = getNextArg()) != END_OF_ARR) nextArg_arr.push(newArg);
-                return nextArg_arr;
-            }
-            else if (argsStr[i] == ']') {
-                i++;
-                return END_OF_ARR;
-            }
-            else {
-                let nextArg_str = "";
-                while (argsStr.length > i) {
-                    if (argsStr[i] == ',') {
-                        i++;
-                        return nextArg_str;
-                    }
-                    if (argsStr[i] == ']') {
-                        return nextArg_str;
-                    }
-                    else nextArg_str += argsStr[i++];
-                }
-                return nextArg_str;
-            }
-        }
-        let newArg;
-        while ((newArg = getNextArg()) != END_OF_ARR) arr.push(newArg);
-        return arr;
     }
     function setAttr(type, key, argsStr) {
         const args = argsStr_to_arr(argsStr);
@@ -873,7 +924,9 @@ function getBook() {
         },
         loadMemory: function (pid) {
             console.log('load', sentenceAction.tempMemories[pid])
-            sentenceAction.tempMemories[pid] ? (sentenceAction.stateMemory = objCopy(sentenceAction.tempMemories[pid])) : (() => { throw ("load fail") })();
+            sentenceAction.tempMemories[pid] ?
+                (sentenceAction.stateMemory = objCopy(sentenceAction.tempMemories[pid]))
+                : (() => { throw ("load fail") })();
         },
         getMemory: function () {
             console.log('get', objCopy(sentenceAction.stateMemory))
@@ -927,31 +980,44 @@ function getBook() {
                 };
                 nowStory.to.able.add(e[2]);
                 addJump(newOption);
-                para[e[1]] = { from: pid };
+                para[e[1]] ?? (para[e[1]] = {});
+                para[e[1]].from = pid;
                 return newOption;
             });
             console.log(this.options)
         },
         "CG": function (arr) {
             this.CG = sentenceAction.stateMemory.CG = arr[0];
-            this.CG && addPreload("CG", this.CG)
+            this.CG && addPreload("CG", this.CG);
             arr[1] && (this.CG_transform = sentenceAction.stateMemory.CG_transform = arr[1]);
         },
         "CGOut": function (arr) {
             this.CG = sentenceAction.stateMemory.CG = null;
         },
+        "BGM": function (arr) {
+            this.BGM = sentenceAction.stateMemory.BGM = arr[0];
+            this.BGM && addPreload("BGM", this.BGM);
+        },
+        "voice": function (arr) {
+            this.voice = arr[0];
+            this.voice && addPreload("voice", this.voice);
+        },
     }
-    function Story(id,line) {
+    function Story(id, line) {
+        // alert(id)
+        // debugger;
         const readId = line[0].slice(line[0].indexOf(':') + 1)
-        if(id!=readId){
+        if (id != readId) {
+            console.log(line)
             throw `Story:ID 验证有误！ 传入：${id} 读取：${readId}`
         }
+        sentenceAction.cleanMemory();
         const newStory = {
             id: id,
             title: id,
             start: null,
             end: [],
-            preload: { chara_pic: new Set(), CG: new Set(), place: new Set() },
+            preload: { chara_pic: new Set(), CG: new Set(), place: new Set(), BGM: new Set(), voice: new Set() },
             tips: ["home"],
             to: {
                 default: null, able: new Set()
@@ -985,7 +1051,8 @@ function getBook() {
                             sentenceAction[actionName].call(newSentence, argsStr_to_arr(argsStr), paragraph, nowParagraphId, newStory);
                         }
                     }
-                    console.log({newSentence})
+                    // debugger;
+                    console.log({ newSentence }, paragraph[nowParagraphId])
                     paragraph[nowParagraphId].data.push(newSentence);
                     break;
                 case '>':
@@ -1030,7 +1097,7 @@ function getBook() {
         newStory.end.forEach((e, i, arr) => {
             arr[i] = paragraph[e].end;
         })
-        newStory.to.able = Array.from(newStory.to.able);
+        newStory.to.able = Array.from(newStory.to.able).filter(e => e);
         newStory.preload = ((e) => {
             let newPreload = [];
             for (let name in e) {
@@ -1054,6 +1121,7 @@ function getBook() {
             default_style: null,
             data: {}
         };
+        // debugger;
         for (let i = 1; i < line.length; i++) {
             switch (line[i].charAt(0)) {
                 case '>':
@@ -1069,12 +1137,68 @@ function getBook() {
                     break;
             }
         }
+        newBook.data = objCopy(STORY);
+        // debugger;
+        const getStoryTreeAllStorySet = (function () {
+            const temp = {};
+            return (function (book, rootStoryId) {
+                const nowStory = book.data[rootStoryId];
+                if (nowStory.to.able.length == 0) {
+                    return temp[rootStoryId] ?? (temp[rootStoryId] = new Set([rootStoryId]));
+                }
+                else {
+                    if (temp[rootStoryId]) return temp[rootStoryId];
+                    temp[rootStoryId] = new Set([rootStoryId]);
+                    return temp[rootStoryId] = new Set([rootStoryId, ...nowStory.to.able.map(e => Array.from(getStoryTreeAllStorySet(book, e))).flat(1)])
+                }
+            })
+        })();
+        const getEndStorySet = (function () {
+            const temp = {};
+            return (function (book, rootStoryId) {
+                const nowStory = book.data[rootStoryId];
+                // debugger;
+                if (nowStory.to.able.length == 0) {
+                    return temp[rootStoryId] ?? (temp[rootStoryId] = new Set([rootStoryId]));
+                }
+                else {
+                    if (temp[rootStoryId]) return temp[rootStoryId];
+                    temp[rootStoryId] = new Set([rootStoryId]);
+                    return temp[rootStoryId] = new Set([...nowStory.to.able.map(e => Array.from(getEndStorySet(book, e))).flat(1)])
+                }
+            })
+        })();
+        // debugger;
+        if (!newBook.start) return newBook;
+        const ee = getEndStorySet(newBook, newBook.start);
+        Array.from(ee).forEach((e) => {
+            newBook.end[e] ?? (newBook.end[e] = `在${e}结束`);
+        })
+        // newBook.end = {
+        //     ...(newBook.end ?? {}),
+        //     ...Object.fromEntries(Array.from(ee).map(e => [e, `在${e}结束`])),
+        // }
         return newBook;
     }
     return function _Book(book_line, story_line) {
         // console.log("Book Output");
-        Object.entries(story_line).map(([storyId,storyTextData]) => [storyId,storyTextData.split('\n')]).forEach(([storyId,story_line]) => Story(storyId,story_line,));
-        return { Book: Book(book_line.split('\n')), STORY, SENTENCE }
+        // console.log(Object.entries(story_line).map(
+        //     ([storyId, storyTextData]) => [storyId, storyTextData.split('\n')]
+        // ).map(([storyId, story_line]) => Story(storyId, story_line)));
+        if (story_line) {
+            Object.entries(story_line).map(
+                ([storyId, storyTextData]) => [storyId, storyTextData.split('\n')]
+            ).map(([storyId, story_line]) => Story(storyId, story_line));
+        }
+        const re = {
+            Book: Book(book_line.split('\n')),
+            STORY: objCopy(STORY),
+            SENTENCE: objCopy(SENTENCE)
+        };
+        // debugger;
+        for (let i in STORY) delete STORY[i];
+        for (let i in SENTENCE) delete SENTENCE[i];
+        return re;
     }
 };
 const textToBOOK = getBook();
@@ -1083,15 +1207,18 @@ const textToBOOK = getBook();
 export let writeRe = {};
 export const write = (bookName) => {
     const re = textToBOOK(b[bookName], s[bookName]);
+    // debugger;
     return (writeRe[bookName] = {
         BOOK: re.Book,
         STORY: { data: re.STORY },
         SENTENCE: { data: re.SENTENCE }
     })
 }
-if (packageSampleUsing) write("sample");
-export const BOOK = !packageSampleUsing ? {} : { "sample": writeRe.sample.BOOK };
-export const STORY = !packageSampleUsing ? {} : { "sample": writeRe.sample.STORY };
+// if (packageSampleUsing) write("sample");
+export const BOOK = !packageSampleUsing ? {} : { "sample": writeRe.sample?.BOOK };
+export const STORY = !packageSampleUsing ? {} : { "sample": writeRe.sample?.STORY };
+// export const BOOK = {};
+// export const STORY = {};
 // export const BOOK = {
 //     data: {
 //         Book1: {
@@ -1121,18 +1248,4 @@ export const STORY = !packageSampleUsing ? {} : { "sample": writeRe.sample.STORY
 //     // BOOK
 // )
 
-export const activePage_map = {
-    home: {
-        name: "home",
-        preload: createPreloadList('_H'),
-        ch: "首页",
-        tips: ["home"]
-    },
-    main: {
-        name: "main",
-        preload: [],
-        ch: "主页面",
-        tips: []
-    }
-};
 

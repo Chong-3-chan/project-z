@@ -1,0 +1,62 @@
+.HomeP{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.HomeP .menu{
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    height: 6rem;
+    width: 4rem;
+
+    position: absolute;
+    height: 9rem;
+    justify-content: center;
+    right: 0;
+}
+.HomeP .title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    /* top:.6rem; */
+    position: absolute;
+    bottom: 0;
+    height: 2rem;
+}
+.HomeP .menu>.menu-item{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: .8rem;
+    cursor: pointer;
+    position: relative;
+    font-size: .3rem;
+    color: black;
+    text-shadow: 
+    .02rem .02rem 0 #aaa, -.02rem .02rem 0 #aaa, .02rem -.02rem 0 #aaa, -.02rem -.02rem 0 #aaa,
+    .02rem .02rem .1rem #aaa, -.02rem .02rem .1rem #aaa, .02rem -.02rem .1rem #aaa, -.02rem -.02rem .1rem #aaa;
+}
+.HomeP .menu>.menu-item:hover{
+    text-shadow: 
+    .02rem .02rem 0 #eee, -.02rem .02rem 0 #eee, .02rem -.02rem 0 #eee, -.02rem -.02rem 0 #eee,
+    .02rem .02rem .1rem #eee, -.02rem .02rem .1rem #eee, .02rem -.02rem .1rem #eee, -.02rem -.02rem .1rem #eee;
+}
+
+.HomeP .logo{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: .6rem;
+    /* top:.6rem; */
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 1rem;
+    width: 2rem;
+}

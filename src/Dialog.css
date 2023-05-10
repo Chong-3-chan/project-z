@@ -1,0 +1,167 @@
+.dialog {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    /* background-color: rgba(0, 0, 0, .6); */
+    line-height: 1.5;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    color: #ffe;
+    /* animation: fade-in .2s ease-in-out forwards; */
+}
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+.dialog.out .dialog-inner{
+    animation: fade-out .2s ease-in-out forwards;
+}
+@keyframes fade-in {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 1;
+    }
+}
+
+
+.dialog::before {
+    content: "";
+    background-color: rgba(0, 0, 0, .6);
+    backdrop-filter: blur(.1rem);
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;    
+    animation: fade-in .5s ease-in-out forwards;
+}
+
+.dialog-inner {
+    position: relative;
+    border-radius: .16rem;
+    max-height: 8rem;
+    max-width: 12rem;
+    min-height: 2rem;
+    min-width: 3rem;
+    width: fit-content;
+    height: fit-content;
+    /* height: 8rem;
+    width: 12rem; */
+    overflow: hidden;
+    animation: fade-in 1s ease forwards;
+    /* background-color: #ffe; */
+}
+
+.dialog-inner .header {
+    /* background-color: rgb(45, 45, 90); */
+    height: .5rem;
+    position: relative;
+    top: 0;
+    left: 0;
+    right: 0;
+    color: #ffe;
+    font-size: .28rem;
+    line-height: .6rem;
+    text-align: center;
+}
+
+.dialog-inner .close {
+    /* border: .03rem solid #aaa; */
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: .15rem;
+    height: .3rem;
+    width: .3rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 70%;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADB0lEQVRYR8XZSXLTQBQG4P9lBRQnSFFcQ7JkkHwTQhKmAAEWkHkeYAcEwjyuqOIQlqssW+YCsKUqrNiwgV38KLnsRGl3Sy3Jlr20WurP/2t1t2Sq+d8uMtr7AJ1i8FLFNr9ghJ9aI5hlxiaA34SxCfL84BeA8a6JmflKpVx6OwqjVw9WQFiP9P0jBP4FcCbyJQN81bVLb4pESnBh9wdUbQRzxNgVMIUiFTgmpgkKYVW/tUXgxVEga35rlcFrYt9EuOZY5usOMPzU/GCTgSVVw2GUOwkX9nkELBqpg+sDFoWs+s01Aq3qVOtEgkWUW4VTzRxSYAj16sEGCMv9v5KuO5bxKsuY9BrBOhgraW5GJXDQyCw46RgUk1ElyUw3KmXjpU6SKpzOqhWbYK9zdQfJyDw4rQTzINXp66/3WglmQSpvMqZpp2y80xkaqRJMQgI849qlF7E3V0pcJmB4UsxcNkOgcemSmQGXGRiDlFWOiTDlWOZ73bJG26Uag2IHiiSjzXLhciV4vCxKt0vh4dy4gQAVe8kOEMBN1zb3s5S2d07OEks3umKJbzmW+TwrMjPQ85vbAC0IHbcBjImbASJkRmYCqnBEmOY2zglPZp1yM9PtStl4ljbJ1MCY5KZc2/zQnajFx8fMyFRArxHsgDEvKesRLrLiLIOxIZY7bZLawDS4QSK1gArcIYDpXllVY8trBNIkAZ517dJe0phMBNbqwS4T5oQLaeF651T95hKBwvctJ6YgHWQscBA4DeQd1y49VSWpBA4Slwcpf+xUlJXBUxW79DFp3MQdjym3NMk+YNVvPSTwA3HMDQJ3vMFoLjJoSzIm+5AngEXgkpBEuOtY5pO+zYLnNx8BdF9MjpgmnbLxKU9ZVefWfHmSUWQnwVHgjibzemsBxNt9Kw7hXsUyH5NiIj0cZnJiop4CCWAyfAX8D8DpyEmF4hKSPCDPb/4E6Hy34SERXXYs4/MwxlzSNb16MA/CTqTdd/LqrQsg3gPoLAjzrmV8TbrQMI93/4YIXwn/aVP70n+OfBhghPU19QAAAABJRU5ErkJggg==);
+}
+
+.dialog-inner .body {
+    position: relative;
+    /* top: .6rem; */
+    /* bottom: 0;
+    left: 0;
+    right: 0; */
+    /* overflow: auto; */
+    margin: .2rem;
+}
+
+.dialog-inner .text {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: space-evenly;
+    font-size: .2rem;
+    align-items: center;
+    min-height: .8rem;
+}
+
+.dialog-inner .text>p {
+    margin-top: 0;
+    margin-bottom: .1rem;
+    font-size: .28rem;
+}
+
+.dialog-inner .button-list {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    margin-top: .1rem;
+    font-size: .2rem;
+}
+
+.dialog-inner .button-list>.dialog-button {
+    border: .01rem solid #aaa;
+    height: .6rem;
+    width: 1.6rem;
+    text-align: center;
+    line-height: .6rem;
+}
+
+@keyframes turn-color {
+    0% {
+        background-color: rgba(255, 255, 238, 0);
+    }
+
+    100% {
+        background-color: var(--turn-color);
+    }
+}
+
+.dialog-inner .button-list>.dialog-button.green:hover {
+    --turn-color: rgba(0, 255, 0, .2);
+    animation: turn-color .1s ease-in-out forwards;
+}
+
+.dialog-inner .button-list>.dialog-button.red:hover {
+    --turn-color: rgba(255, 0, 0, .2);
+    animation: turn-color .1s ease-in-out forwards;
+}
+
+.dialog-inner .button-list>.dialog-button:not(:first-child) {
+    margin-left: .3rem;
+}
