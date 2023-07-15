@@ -6,11 +6,12 @@ body {
     margin: 0;
     background-color: #000000;
     user-select: none;
-    font-size: 0.2rem;
+    font-size: .2rem;
 }
 
 html {
     font-size: max(50px, min(11.111111vh, 6.25vw));
+    /* font-size: max(25px, min(5.555555vh, 3.125vw)); */
 }
 
 #app {
@@ -18,8 +19,133 @@ html {
     width: 16rem;
     overflow: hidden;
     position: absolute;
-    left: 0;right: 0;top:0;bottom:0;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
     margin: auto;
+    background-color: #fff;
+    user-select: text;
+}
+
+#menu {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2rem;
+    height: 9rem;
+}
+
+#menu ul {
+    list-style: none;
+    position: relative;
+    margin: 0;
+    padding-left: 0;
+    background-color: #fff;
+    box-sizing: border-box;
+}
+
+#funtion-menu li {
+    padding: .1rem .2rem;
+}
+
+#funtion-menu li.active {
+    background-color: #fff4ec;
+}
+
+#funtion-menu li:not(.active):hover {
+    background-color: #ecf5ff;
+}
+
+#data-view {
+    position: absolute;
+    top: 0;
+    left: 2rem;
+    width: 14rem;
+    height: 9rem;
+    overflow: auto;
+}
+
+#data-view ul {
+    width: fit-content;
+}
+
+#data-view ul.childHide>li {
+    display: none;
+}
+
+#data-view div.clickable {
+    width: fit-content;
+    cursor: pointer;
+    background-color: #ecf5ff;
+}
+
+#data-view div.clickable.clicked {
+    cursor: pointer;
+    background-color: #ffcccc;
+}
+
+#data-view div.HidableUl,
+#data-view button.HidableUl-button {
+    font-size: inherit;
+    display: inline;
+}
+
+#data-view button.HidableUl-button {
+    font-size: .16rem;
+    margin: .02rem .05rem;
+}
+
+.file-download,
+.file-upload {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+#data-view .dataAssign {
+    border: 1px solid blue;
+}
+
+#data-view .dataAssign::after {
+    content: ' *新增的（未应用）';
+    color: blue;
+}
+
+#data-view .deleted {
+    text-decoration: line-through;
+}
+
+#data-view .covered {
+    filter: invert(10%);
+    border: 1px solid red;
+}
+
+#data-view .covered::after {
+    content: ' *将被覆盖（更新）';
+    color: red;
+}
+
+#data-view .data-filter {
+    display: inline;
+}
+
+#data-view input.data-filter {
+    margin: 0 .1rem;
+}
+
+#app-view {
+    height: 9rem;
+    width: 16rem;
+    overflow: hidden;
+    position: absolute;
+    left: auto;
+    right: 0;
+    top: 0;
+    bottom: auto;
+    margin: auto;
+    transform: translate(calc(50% - 0.3 * 8rem), calc(0.3 * 4.5rem - 50%)) scale(0.3);
+    user-select: none;
 }
 
 .LoadingP,
@@ -28,7 +154,9 @@ html {
     height: 100%;
     width: 100%;
     overflow: hidden;
-    background-color: rgba(255, 0, 0, 0.1);
+    /* background-color: rgba(255, 0, 0, 0.1); */
+    background-color: black;
+    background-size: 100% auto;
     position: absolute;
     top: 0;
     bottom: 0;
@@ -63,4 +191,310 @@ html {
     color: aliceblue;
     border: 2px solid #333;
     height: fit-content;
+}
+
+.ResourceView {
+    overflow: auto;
+    height: 9rem;
+    color: aliceblue;
+    background-color: darkslategray;
+    display: grid;
+    justify-content: center;
+    grid-template-columns: repeat(5, 3rem);
+}
+
+.ResourceView::-webkit-scrollbar {
+    /* width: 0; */
+    display: none;
+}
+
+.ResourceView .viewBox {
+    height: 4rem;
+    outline: 1px solid snow;
+}
+
+.ResourceView .viewBox img {
+    max-height: 3.5rem;
+    max-width: 3rem;
+}
+
+.ResourceView .viewBox p {
+    height: .5rem;
+    margin: 0;
+}
+
+.ResourceView .viewBox a:-webkit-any-link {
+    color: unset;
+    cursor: pointer;
+}
+
+.ResourceView .viewBox a:focus img {
+    max-height: none;
+    max-width: none;
+    max-height: 95%;
+    max-width: 95%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+}
+
+#controller-menu {
+    position: relative;
+}
+
+#controller-menu>* {
+    margin: .1rem .1rem;
+    border: 1px dashed #333;
+    border-radius: .1rem;
+}
+
+#controller-menu li {
+    text-align: center;
+}
+
+#controller-menu li button {
+    font-size: .24rem;
+    margin: .05rem 0;
+}
+
+/* .viewerSize-controller {
+    text-align: center;
+} */
+
+
+/* .setNext-controller {
+    text-align: center;
+} */
+.setNext-controller select {
+    width: 80%;
+    font-size: .2rem;
+}
+
+/* .viewerDisplay-controller {
+    text-align: center;
+} */
+
+.viewerDisplay-controller input[type="checkbox"] {
+    vertical-align: middle;
+}
+.viewerDisplay-controller input {
+    max-width: 75%;
+}
+.viewerDisplay-controller>div {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+}
+
+.dialog {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, .6);
+    z-index: 9999;
+    line-height: 1.5;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    /* font-size: 14px; */
+}
+
+.dialog input {
+    font-size: .2rem;
+}
+
+.dialog-inner {
+    position: relative;
+    border-radius: .16rem;
+    max-height: 8rem;
+    max-width: 12rem;
+    min-height: 2rem;
+    min-width: 3rem;
+    height: 8rem;
+    width: 12rem;
+    overflow: hidden;
+    background-color: #ffe;
+}
+
+.dialog-inner .header {
+    background-color: rgb(45, 45, 90);
+    height: .6rem;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    color: #ccc;
+    font-size: .24rem;
+    line-height: .6rem;
+    text-align: center;
+}
+
+.dialog-inner .close {
+    border: .03rem solid #aaa;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: .15rem;
+    height: .3rem;
+    width: .3rem;
+    box-sizing: border-box;
+    cursor: pointer;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 70%;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAADB0lEQVRYR8XZSXLTQBQG4P9lBRQnSFFcQ7JkkHwTQhKmAAEWkHkeYAcEwjyuqOIQlqssW+YCsKUqrNiwgV38KLnsRGl3Sy3Jlr20WurP/2t1t2Sq+d8uMtr7AJ1i8FLFNr9ghJ9aI5hlxiaA34SxCfL84BeA8a6JmflKpVx6OwqjVw9WQFiP9P0jBP4FcCbyJQN81bVLb4pESnBh9wdUbQRzxNgVMIUiFTgmpgkKYVW/tUXgxVEga35rlcFrYt9EuOZY5usOMPzU/GCTgSVVw2GUOwkX9nkELBqpg+sDFoWs+s01Aq3qVOtEgkWUW4VTzRxSYAj16sEGCMv9v5KuO5bxKsuY9BrBOhgraW5GJXDQyCw46RgUk1ElyUw3KmXjpU6SKpzOqhWbYK9zdQfJyDw4rQTzINXp66/3WglmQSpvMqZpp2y80xkaqRJMQgI849qlF7E3V0pcJmB4UsxcNkOgcemSmQGXGRiDlFWOiTDlWOZ73bJG26Uag2IHiiSjzXLhciV4vCxKt0vh4dy4gQAVe8kOEMBN1zb3s5S2d07OEks3umKJbzmW+TwrMjPQ85vbAC0IHbcBjImbASJkRmYCqnBEmOY2zglPZp1yM9PtStl4ljbJ1MCY5KZc2/zQnajFx8fMyFRArxHsgDEvKesRLrLiLIOxIZY7bZLawDS4QSK1gArcIYDpXllVY8trBNIkAZ517dJe0phMBNbqwS4T5oQLaeF651T95hKBwvctJ6YgHWQscBA4DeQd1y49VSWpBA4Slwcpf+xUlJXBUxW79DFp3MQdjym3NMk+YNVvPSTwA3HMDQJ3vMFoLjJoSzIm+5AngEXgkpBEuOtY5pO+zYLnNx8BdF9MjpgmnbLxKU9ZVefWfHmSUWQnwVHgjibzemsBxNt9Kw7hXsUyH5NiIj0cZnJiop4CCWAyfAX8D8DpyEmF4hKSPCDPb/4E6Hy34SERXXYs4/MwxlzSNb16MA/CTqTdd/LqrQsg3gPoLAjzrmV8TbrQMI93/4YIXwn/aVP70n+OfBhghPU19QAAAABJRU5ErkJggg==);
+}
+
+.dialog-inner .body {
+    position: absolute;
+    top: .6rem;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    overflow: auto;
+    margin: .2rem;
+}
+
+.dialog-inner .body::-webkit-scrollbar {
+    /* width: 0; */
+    display: none;
+}
+
+.dialog-inner .body form {
+    position: relative;
+    border: .01rem solid black;
+    overflow: hidden;
+}
+
+.dialog-inner .body form input[type=submit] {
+    position: relative;
+    float: right;
+    height: .4rem;
+    width: .8rem;
+    margin: .1rem .5rem .2rem .5rem;
+}
+
+.dialog-inner .body form .form-item {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    padding: .1rem 0;
+}
+
+.dialog-inner .body form .form-item_map {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    padding: .1rem 0;
+}
+
+.dialog-inner .body form .form-item_vm {
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    padding: .1rem;
+    box-sizing: border-box;
+    border-top: .02rem dashed black;
+}
+
+.dialog-inner .body form .ch {
+    width: 1rem;
+    text-align: end;
+    white-space: nowrap;
+}
+
+.dialog-inner .body form input,
+.dialog-inner .body form select {
+    max-width: 100%;
+    font-size: .2rem;
+    margin: 0 .05rem;
+    vertical-align: middle;
+}
+
+.dialog-inner .body form input[type=file] {
+    height: auto;
+}
+
+.dialog-inner .body form .key,
+.dialog-inner .body form .value {
+    display: inline;
+    height: auto;
+    box-sizing: content-box;
+}
+
+.dialog-inner .body form .key {
+    width: 1rem;
+    /* margin-right: .rem; */
+}
+
+.dialog-inner .body form .value {
+    /* margin-left: .15rem;
+    margin-right: .15rem; */
+    width: 4rem;
+}
+
+.dialog-inner .body form .key-value {
+    display: block;
+    margin: .05rem 0;
+}
+
+.dialog-inner .body form a {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+    margin: 0 .05rem;
+    user-select: none;
+}
+
+.dialog-inner .body form a.disable {
+    color: gray;
+    cursor: not-allowed;
+}
+
+.dialog-inner .body form .edit-sentence {
+    display: block;
+}
+
+.dialog-inner .body form .edit-sentence>* {
+    display: inline;
+}
+
+.dialog-inner .body form .edit-sentence .tx:focus {
+    display: block;
+    width: calc(100% - .2rem);
+    /* box-sizing: border-box; */
+}
+
+.dialog-inner .body form .sentence-function-input {
+    padding: .1rem;
+    padding-left: .5rem;
+    border: .01rem dashed rgb(64, 64, 64);
+    border-radius: .1rem;
+}
+
+.dialog-inner .body form .sentence-function-input.root {
+    margin: .1rem 0;
+    padding-left: 0.1rem;
+    display: block;
+    border: .04rem double rgb(64, 64, 64);
+}
+
+.dialog-inner .body form .sentence-function-input select {
+    display: inline;
+}
+
+.dialog-inner .body form .delete-force {
+    background-color: rgba(255, 0, 0, 0.2);
 }
