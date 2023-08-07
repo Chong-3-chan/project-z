@@ -125,7 +125,7 @@ export const argsStr_to_arr = (function () {
 })();
 // export const resource_base_path = "http://projecta-resource.com/extra_test_active/";
 // export const resource_base_path = "http://pixiv.miunachan.top/extra_test_active/";
-export const resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
+// export const resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
 export const DEFAULT_PAGESTATE = {
 
 };

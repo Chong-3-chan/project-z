@@ -125,7 +125,7 @@ export const argsStr_to_arr = (function () {
 })();
 // export const resource_base_path = "http://projecta-resource.com/extra_test_active/";
 // export const resource_base_path = "http://pixiv.miunachan.top/extra_test_active/";
-export const resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
+export const resource_base_path = "https://chong-chan.cn/resource/sample3/";
 export const DEFAULT_PAGESTATE = {
 
 };
@@ -250,15 +250,30 @@ export const package_map = {
     'place_SAMPLE': 'package/place_SAMPLE.zip',
     'BGM_SAMPLE': 'package/BGM_SAMPLE.zip',
     'voice_SAMPLE': 'package/voice_SAMPLE.zip',
-    'home_SAMPLE': 'package/home_SAMPLE.zip'
+    'home_SAMPLE': 'package/home_SAMPLE.zip',
+    'CG_SAMPLE': 'package/CG_SAMPLE.zip',
 }
-export const file_map = {
-    _P_INDOOR_5: { packageKey: 'place_SAMPLE', fileName: 'bg_3571.png' },
-    _P_INDOOR_4: { packageKey: 'place_SAMPLE', fileName: 'bg_3573.png' },
-    _C_12_01: { packageKey: 'chara_SAMPLE', fileName: 'tati_120101.png' },
-    _BGM_01: { packageKey: 'BGM_SAMPLE', fileName: 'bgm_0208_loop.ogg' },
-    _H_BG_0: { packageKey: 'home_SAMPLE', fileName: 'bg_0.png' },
-    _H_BG_1: { packageKey: 'home_SAMPLE', fileName: 'bg_1.png' },
+export const file_map =
+// {
+//     _P_INDOOR_5: { packageKey: 'place_SAMPLE', fileName: 'bg_3571.png' },
+//     _P_INDOOR_4: { packageKey: 'place_SAMPLE', fileName: 'bg_3573.png' },
+//     _C_12_01: { packageKey: 'chara_SAMPLE', fileName: 'tati_120101.png' },
+//     _BGM_01: { packageKey: 'BGM_SAMPLE', fileName: 'bgm_0208_loop.ogg' },
+//     _H_BG_0: { packageKey: 'home_SAMPLE', fileName: 'bg_0.png' },
+//     _H_BG_1: { packageKey: 'home_SAMPLE', fileName: 'bg_1.png' },
+// }
+{
+    "_P_INDOOR_5": { "packageKey": "place_SAMPLE", "fileName": "bg_3571.png" },
+    "_P_INDOOR_4": { "packageKey": "place_SAMPLE", "fileName": "bg_3573.png" },
+    "_C_12_01": { "packageKey": "chara_SAMPLE", "fileName": "tati_120101.png" },
+    "_BGM_01": { "packageKey": "BGM_SAMPLE", "fileName": "bgm_0208_loop.ogg" },
+    "_H_BG_0": { "packageKey": "home_SAMPLE", "fileName": "bg_0.png" },
+    "_H_BG_1": { "packageKey": "home_SAMPLE", "fileName": "bg_1.png" },
+    "_BGM_02": { "packageKey": "BGM_SAMPLE", "fileName": "bgm_0206_loop.ogg" },
+    "CG_01": { "packageKey": "CG_SAMPLE", "fileName": "eve_011401.png" },
+    "CG_02": { "packageKey": "CG_SAMPLE", "fileName": "eve_011402.png" },
+    "_H_LOGO": { "packageKey": "home_SAMPLE", "fileName": "霂LOGO.png" },
+    "_H_TITLE": { "packageKey": "home_SAMPLE", "fileName": "_h_title.png" }
 }
 export const chara_map = {
     "12": {
@@ -270,6 +285,16 @@ export const chara_map = {
     }
 }
 export const tips_group = {
+    "home": [
+        {
+            title: "首页tips1",
+            text: "11这是首页tips1"
+        },
+        {
+            title: "首页tips2",
+            text: "22这是首页tips2"
+        }
+    ],
     "test": [
         {
             title: "这是什么？",
@@ -330,14 +355,14 @@ export const s = {
 ~2:
 @##选择了下一句
 ~2 end`,
-"非常道": `=STORY:非常道
+        "非常道": `=STORY:非常道
 >title=一 · 二 非常道
 >end=0
 >tips=test
 ~0:
 @12##非常道。##chara[12,01,b_2]##setPlace[_P_INDOOR_5]##BGM[_BGM_01]
 ~0 end`,
-"名可名": `=STORY:名可名
+        "名可名": `=STORY:名可名
 >title=二 · 一 名可名
 >end=0
 >tips=test
@@ -374,7 +399,7 @@ export const homeResource_map = {
         }
     }
 }
-export const information_map = 
+export const information_map =
 {
     "info_1": {
         "id": "info_1",
@@ -442,7 +467,7 @@ export const information_map =
         ]
     }
 }
-export const allData= {
+export const allData = {
     package_map,
     file_map,
     chara_map,
@@ -452,6 +477,7 @@ export const allData= {
     s,
     information_map,
     homeResource_map,
+    resource_base_path
 };
 export const BOOKFromChild = {};
 export const STORYFromChild = {};
