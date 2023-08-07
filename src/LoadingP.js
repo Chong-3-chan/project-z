@@ -3,7 +3,7 @@ import { getFileSrc, getPackagePath, file_map, objCopy, package_map } from "./da
 // import { getFileSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
-import { pageContext } from './App.js'
+import { classNames, pageContext } from './App.js'
 import PackageInfo, { createPackageInfoList } from './class/package-info.js'
 import FileInfo from './class/file-info.js'
 import './LoadingP.css'
@@ -89,7 +89,17 @@ function LoadingP(props) {
   const [getFile_total, setFile_total] = ((e) => [() => e.current, (value) => e.current = value])(useRef());
   useEffect(() => {
     // packages:{}(key为packageName.value为new packageInfo())
-    setPackages(createPackageInfoList(Object.fromEntries(Array.from(new Set((loadList.map(e => e.data)).flat(1).map(e => file_map[e]?.packageKey))).map(e => [e, getPackagePath(e)]))));
+    // console.log(
+    //   loadList,file_map,
+    //   Array.from(new Set((loadList.map(e => e.data)).flat(1).map(e => file_map[e]?.packageKey))).map(e => [e, getPackagePath(e)])
+    // );
+    setPackages(
+      createPackageInfoList(
+        Object.fromEntries(
+          Array.from(new Set(
+            (loadList.map(e => e.data)).flat(1).map(e => file_map[e]?.packageKey).filter(e => e)
+          )).map(e => [e, getPackagePath(e)])
+        )));
     setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length })));
     console.log(getLoadingProgress(), setLoadingProgress(loadList.map(e => ({ done: 0, total: e.data.length }))))
     setFile_total(eval(getLoadingProgress().map(e => e.total).join('+')) ?? 0);
@@ -178,7 +188,7 @@ function LoadingP(props) {
                 break;
               case "done":
                 let fileNameList = Object.entries(file_map).filter(([, { packageKey }]) => packageKey == packageName).map(([, { fileName }]) => fileName);
-                console.log(msg.data, "done msgdata", package_map,fileNameList);
+                console.log(msg.data, "done msgdata", package_map, fileNameList);
                 Object.entries(msg.data).forEach(([fileName, { type, data }]) => {
                   // console.log(packageName, fileName, type, data,"new FileInfo");
                   let index = fileNameList.indexOf(fileName);
@@ -209,14 +219,13 @@ function LoadingP(props) {
             console.log(re, packageName, getPackages()[packageName], "file load done");
           })
         )).then(() => loadAll());
-
         return;
       case PHASE_LOADING:
+        action.onLoadStart();
         return;
       case PHASE_LOADED:
         setTimeout(() => setPhase(PHASE_EXITING), 500);
-        // console.log(action.onLoaded);
-        action.onLoaded();
+        // console.log(action.onLoadEnd);
         // console.log(errorTotal, loadedFileTotal);
         // ps_api.pause();
         // bds_api.pause();
@@ -225,6 +234,7 @@ function LoadingP(props) {
         // ts_api.pause();
         return;
       case PHASE_EXITING:
+        action.onLoadEnd();
         setTimeout(() => setPhase(PHASE_EXITED), 1000);
         return;
       case PHASE_EXITED:
@@ -267,7 +277,8 @@ function LoadingP(props) {
     </>
   }
   return (
-    <animated.div className={`LoadingP ${state.nowStyle} ${(phase.indexOf("exit") != -1) ? "exit" : (phase.indexOf("load") != -1) ? "in" : ""}`} style={pageStyle}>
+
+    <animated.div className={classNames("LoadingP", state.nowStyle, (phase.indexOf("exit") != -1) ? "exit" : (phase.indexOf("load") != -1) && "in")} style={pageStyle}>
       <animated.div className={`body`} style={bodyStyle} onMouseUp={changeTip}>
         <animated.div className={`header`}></animated.div>
         <animated.div className={`footer`}></animated.div>

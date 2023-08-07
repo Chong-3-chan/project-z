@@ -86,32 +86,33 @@ const argsStr_to_arr = (function () {
     return function argsStr_to_arr(argsStr) {
         const arr = [];
         let i = 0;
+        const _argsStr = argsStr.trim()
         // console.log(argsStr);
         function getNextArg() {
-            if (argsStr[i] == ',') i++;
-            if (argsStr.length <= i) return END_OF_ARR;
-            if (argsStr[i] == '[') {
+            if (_argsStr[i] == ',') i++;
+            if (_argsStr.length <= i) return END_OF_ARR;
+            if (_argsStr[i] == '[') {
                 i++;
                 const nextArg_arr = [];
                 let newArg;
                 while ((newArg = getNextArg()) != END_OF_ARR) nextArg_arr.push(newArg);
                 return nextArg_arr;
             }
-            else if (argsStr[i] == ']') {
+            else if (_argsStr[i] == ']') {
                 i++;
                 return END_OF_ARR;
             }
             else {
                 let nextArg_str = "";
-                while (argsStr.length > i) {
-                    if (argsStr[i] == ',') {
+                while (_argsStr.length > i) {
+                    if (_argsStr[i] == ',') {
                         i++;
                         return nextArg_str;
                     }
-                    if (argsStr[i] == ']') {
+                    if (_argsStr[i] == ']') {
                         return nextArg_str;
                     }
-                    else nextArg_str += argsStr[i++];
+                    else nextArg_str += _argsStr[i++];
                 }
                 return nextArg_str;
             }
@@ -123,7 +124,9 @@ const argsStr_to_arr = (function () {
 })();
 // export const resource_base_path = "http://projecta-resource.com/extra_test_active/";
 // export const resource_base_path = "http://pixiv.miunachan.top/extra_test_active/";
-export const resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
+export let resource_base_path = "https://chong-chan.cn/resource/extra_test_active/";
+// export let resource_base_path = "https://chong-chan.cn/resource/ex/";
+export function set_resource_base_path(p){console.log("set_resource_base_path");return resource_base_path = p};
 export const DEFAULT_PAGESTATE = {
 
 };
@@ -144,7 +147,10 @@ export const information_map = {
     "info_1": {
         id: "info_1",
         title: "档案1档案1档案1档案1档案1档案1",
-        check: [],
+        check: {
+            read:["Book1/0_0"],
+            ended:[]
+        },
         data: [
             {
                 type: "pic",
@@ -163,8 +169,15 @@ export const information_map = {
     "info_2": {
         id: "info_2",
         title: "档案2",
-        check: ["1_0"],
+        check: {
+            read:[],
+            ended:["Book1/0_0"]
+        },
         data: [
+            {
+                type: "pic",
+                fileKey: "_H_BG_1"
+            },
             {
                 type: "text",
                 text: "有一个段落。"
@@ -824,7 +837,16 @@ function getBook() {
             //     for (let i = 0; i < keys.length; i++) {
             //         this.data[keys[i]] = STORY[keys[i]];
             //     }
-            // },
+            //},
+            "check": function (arrs) {
+                this["check"] = {
+                    read:arrs[0],
+                    ended:arrs[1],
+                }
+            },
+            "cover": function (arr) {
+                this["cover"] = arr[0]
+            },
             "start": function (arr) {
                 this["start"] = arr[0];
             },
@@ -832,6 +854,7 @@ function getBook() {
                 for (let i = 0; i < arrs.length; i++) {
                     this.end[arrs[i][0]] = arrs[i][1];
                 }
+
             },
             "default_style": function (arr) {
                 this["default_style"] = arr[0];
@@ -937,10 +960,12 @@ function getBook() {
             this.place && addPreload("place", this.place)
         },
         "charaOut": function (arr) {
-            this.charas_change = true;
+            // this.charas_change;
             const [outStyle, ...charaIdList] = arr;
             charaIdList.forEach((e) => {
                 const memory = sentenceAction.stateMemory, basePart = memory.charas[e], actionPart = {};
+                if(!basePart)return;
+                !this.charas_change && (this.charas_change = true);
                 actionPart.out = outStyle;
                 this.charas[e] = { ...this.charas[e], ...(basePart), ...actionPart };
                 delete memory.charas[e];
@@ -1118,8 +1143,10 @@ function getBook() {
             start: null,
             name: line[0].slice(line[0].indexOf(':') + 1),
             end: {},
+            cover: null,
             default_style: null,
-            data: {}
+            data: {},
+            check:{read:[],ended:[]}
         };
         // debugger;
         for (let i = 1; i < line.length; i++) {
@@ -1171,7 +1198,9 @@ function getBook() {
         // debugger;
         if (!newBook.start) return newBook;
         const ee = getEndStorySet(newBook, newBook.start);
+        // newBook.end = Object.fromEntries(newBook.end)
         Array.from(ee).forEach((e) => {
+            // debugger;
             newBook.end[e] ?? (newBook.end[e] = `在${e}结束`);
         })
         // newBook.end = {

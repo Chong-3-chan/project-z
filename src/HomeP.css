@@ -19,16 +19,6 @@
     justify-content: center;
     right: 0;
 }
-.HomeP .title{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1rem;
-    /* top:.6rem; */
-    position: absolute;
-    bottom: 0;
-    height: 2rem;
-}
 .HomeP .menu>.menu-item{
     display: flex;
     justify-content: center;
@@ -47,7 +37,31 @@
     .02rem .02rem 0 #eee, -.02rem .02rem 0 #eee, .02rem -.02rem 0 #eee, -.02rem -.02rem 0 #eee,
     .02rem .02rem .1rem #eee, -.02rem .02rem .1rem #eee, .02rem -.02rem .1rem #eee, -.02rem -.02rem .1rem #eee;
 }
-
+.HomeP .menu.b{    
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    width: 16rem;
+    position: absolute;
+    height: 1.5rem;
+    bottom: 0;
+    justify-content: space-evenly;
+    align-items: center;
+}
+.HomeP .menu.b>.menu-item{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: .8rem;
+    cursor: pointer;
+    position: relative;
+    font-size: .3rem;
+    color: black;
+    text-shadow: 
+    .02rem .02rem 0 #aaa, -.02rem .02rem 0 #aaa, .02rem -.02rem 0 #aaa, -.02rem -.02rem 0 #aaa,
+    .02rem .02rem .1rem #aaa, -.02rem .02rem .1rem #aaa, .02rem -.02rem .1rem #aaa, -.02rem -.02rem .1rem #aaa;
+}
 .HomeP .logo{
     display: flex;
     justify-content: center;
@@ -58,5 +72,26 @@
     top: 0;
     left: 0;
     height: 1rem;
-    width: 2rem;
+    width: 1rem;
+}
+
+.HomeP .title{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1rem;
+    /* top:.6rem; */
+    position: absolute;
+    bottom: .2rem;
+    height: 2rem;
+}
+.HomeP .title img{
+    height: 100%;
+    width: 100%;
+    filter: drop-shadow(0 0 .1rem aliceblue);
+}
+.HomeP .logo img{
+    height: 100%;
+    width: 100%;
+    filter: drop-shadow(0 0 .05rem gold);
 }

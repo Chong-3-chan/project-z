@@ -1,0 +1,193 @@
+.ContentP {
+    opacity: 1;
+    animation: fade-in .2s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+.ContentP.out {
+    transition: opacity .2s;
+    opacity: 0;
+}
+
+@keyframes lighting {
+    0% {
+        text-shadow: white 0 0 .1rem;
+    }
+    50%{
+        text-shadow: white 0 0 .15rem;
+    }
+    100%{
+        text-shadow: white 0 0 .1rem;
+    }
+}
+
+.ContentP .header {
+    font-size: .5rem;
+    color: white;
+    position: relative;
+    height: .5rem;
+    margin-block: .8rem .2rem;
+    text-shadow: white 0 0 .1rem;
+    animation: lighting 3s ease-in-out infinite;
+}
+.ContentP .footer {
+    font-size: .45rem;
+    color: #eee;
+    position: relative;
+    height: .6rem;
+    margin-block: .7rem 1.2rem;
+    text-shadow: #eee 0 0 0.1rem;
+    animation: lighting 3s ease-in-out infinite;
+    transition: opacity .2s;
+    opacity: 1;
+}
+.ContentP .footer.hide{
+    opacity: 0;
+}
+
+.ContentP::before {
+    content: "";
+    background-color: rgba(0, 0, 0, .6);
+    backdrop-filter: blur(.1rem);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.container {
+    position: relative;
+    width: 16rem;
+    height: 5rem;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.ContentP .viewer {
+    order: 2;
+    -webkit-box-reflect: below 0 -webkit-linear-gradient(transparent, transparent 50%, rgba(255, 255, 255, .3));
+    position: relative;
+    width: 6rem;
+    height: 5rem;
+    overflow: visible;
+}
+
+.ContentP .wrapper {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: row;
+    /* transition: left 0.5s ease-in-out; */
+}
+
+.ContentP .img-box {
+    height: 100%;
+    width: 6rem;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    position: relative;
+    transform: scale(1) perspective(30rem) rotateY(0deg) rotateX(0deg);
+    filter: opacity(.6) blur(.02rem);
+    transition: transform .5s, filter .3s;
+    overflow: hidden;
+}
+
+.ContentP .img-box.active {
+    transform: scale(1) perspective(24rem) rotateY(0deg) rotateX(0deg) translateY(0rem);
+    filter: opacity(1) blur(0rem);
+}
+
+.ContentP .img-box:has(+.img-box.active) {
+    transform: scale(.75) perspective(48rem) rotateY(-15deg) rotateX(5deg);
+}
+
+.ContentP .img-box.active+.img-box {
+    transform: scale(.75) perspective(48rem) rotateY(15deg) rotateX(5deg);
+}
+.ContentP .img-box.locked {
+    filter: grayscale(1);
+}
+.ContentP .img-box.locked::after {
+    content: "";
+    position: absolute;
+    margin: auto;
+    left: 0;right: 0;top:0;bottom: 0;
+    height: .8rem;
+    width: .8rem;
+    background-size: .8rem;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-size: auto 100%;
+    -webkit-mask-size: auto 100%;
+    --locked-svg: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBzdGFuZGFsb25lPSJubyI/PjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+PHN2ZyB0PSIxNjgzODYyMTQ5NTEwIiBjbGFzcz0iaWNvbiIgdmlld0JveD0iMCAwIDEwMjQgMTAyNCIgdmVyc2lvbj0iMS4xIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHAtaWQ9IjMwNTIiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIiB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCI+PHBhdGggZD0iTTc3MS4wOTA0NTMxMiA0NzEuNjQ3NTE1NjJMMjUyLjg5OTcwMzEyIDQ3MS42NDc1MTU2MmMtNDQuNzU3NTYyNSAwLTgxLjAzNjcwMzEyIDM2LjIwNDMyODEzLTgxLjAzNjcwMzEyIDgwLjg3NjI1MDAxbDAgMzQzLjA3MzM5MDYyYzAgNDQuNjcyOTA2MjUgMzYuMjc5MTQwNjIgODAuODc2MjUgODEuMDM2NzAzMTIgODAuODc2MjVsNTE4LjE5MTczNDM4IDBjNDQuNzU4NTQ2ODggMCA4MS4wNDc1MzEyNS0zNi4yMDMzNDM3NSA4MS4wNDc1MzEyNS04MC44NzYyNUw4NTIuMTM4OTY4NzUgNTUyLjUyMzc2NTYzQzg1Mi4xMzc5ODQzNyA1MDcuODUxODQzNzUgODE1Ljg0OSA0NzEuNjQ3NTE1NjIgNzcxLjA5MDQ1MzEyIDQ3MS42NDc1MTU2MnpNNTQ2LjEyNDM0Mzc1IDcyMS43Mzk3OTY4N2wwIDkwLjA0OTY0MDYzYzAgMTguODQwOTM3NS0xNS4yNjg2NDA2MiAzNC4xMzEyMzQzOC0zNC4xMjkyNjU2MyAzNC4xMzEyMzQzOC0xOC44NDk3OTY4OCAwLTM0LjEyOTI2NTYzLTE1LjI5MDI5Njg3LTM0LjEyOTI2NTYyLTM0LjEzMTIzNDM4bDAtOTAuMDQ5NjQwNjJjLTIwLjM3OTUxNTYyLTExLjgwNDYyNS0zNC4xMzAyNS0zMy44MDgzNTkzOC0zNC4xMzAyNS01OS4wNjM0ODQzOCAwLTM3LjcwMTU2MjUgMzAuNTU3OTUzMTMtNjguMjYwNSA2OC4yNTk1MTU2Mi02OC4yNjA1czY4LjI3MDM0Mzc1IDMwLjU1ODkzNzUgNjguMjcwMzQzNzUgNjguMjYwNUM1ODAuMjY1NDIxODggNjg3LjkzMTQzNzUgNTY2LjUyNTUxNTYyIDcwOS45MzUxNzE4OCA1NDYuMTI0MzQzNzUgNzIxLjczOTc5Njg3ek01MTEuOTk1MDc4MTIgMTQ3LjM3MTc1Yy0xMzEuOTUyNTE1NjIgMC0yMzguOTI5NDY4NzUgMTA1LjQ2ODg5MDYzLTIzOC45Mjk0Njg3NSAyNDQuMDQwMzQzNzVsMWUtOCAxMDUuOTgyNzM0MzcgNDc3Ljg3MDc1IDIyLjc1Mjg0Mzc1TDc1MC45MzYzNTkzOCAzOTEuNDEyMDkzNzVDNzUwLjkzNjM1OTM4IDI1Mi44NDA2NDA2MiA2NDMuOTU5NDA2MjUgMTQ3LjM3MTc1IDUxMS45OTUwNzgxMiAxNDcuMzcxNzV6TTM0MS4zNjc0NTMxMiA0OTEuNDA2ODc1TDM0MS4zNjc0NTMxMiAzODkuMDM4NzY1NjJjMC05NC4yMjA0Mzc1IDc2LjM5NTM3NS0xNzAuNjI3NjI1IDE3MC42MjY2NDA2My0xNzAuNjI3NjI1IDk0LjI0MjA5Mzc1IDAgMTcwLjYyNzYyNSA3Ni40MDcxODc1IDE3MC42Mjc2MjUgMTcwLjYyNzYyNWwwIDEwNC43NjMwOTM3NUwzNDEuMzY3NDUzMTIgNDkxLjQwNjg3NXoiIHAtaWQ9IjMwNTMiPjwvcGF0aD48L3N2Zz4=);
+    mask-image: var(--locked-svg);
+    -webkit-mask-image: var(--locked-svg);
+    background-color: rgb(192, 192, 192,.5);
+    opacity: 0;
+    transition: opacity .2s;
+}
+.ContentP .img-box.active.locked::after{
+    opacity: 1;
+}
+
+.ContentP .img-box img {
+    object-fit: scale-down;
+    max-height: 100%;
+    max-width: 100%;
+    margin: auto;
+}
+
+.ContentP .btn {
+    position: relative;
+    /* top: 50%;
+    transform: translateY(-50%); */
+    width: 5rem;
+    height: 4rem;
+    border: none;
+    /* border-radius: 50%; */
+    background-color: transparent;
+    color: white;
+}
+
+.ContentP .left {
+    order: 1;
+}
+
+.ContentP .right {
+    order: 3;
+}
+.dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.dots span {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+    border-radius: 50%;
+}
+
+.dots .active {
+    background-color: red
+}

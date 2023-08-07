@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, useCallback } from 'react'
-import { options_Group, options_List, pageContext } from './App';
+import { classNames, options_Group, options_List, pageContext } from './App';
 import './OptionsP.css'
 const sc = ((t) => {
     let timeout = null;
@@ -10,18 +10,26 @@ const sc = ((t) => {
             timeout = null;
         }, t);
     }
-})(25)
+})(40)
+let closing = null;
 function OptionsP() {
     const { pageAction: action, pageState } = useContext(pageContext);
     const [nowGroup, setNowGroup] = useState(Object.keys(options_Group)[0])
     const Options = pageState.options;
+    const [displayState, setDisplayState] = useState("in");
+    useEffect(() => {
+        closing && (clearTimeout(closing), closing = null);
+        displayState == "in" && setTimeout(() => setDisplayState("default"), 200);
+        displayState == "out" && (closing = setTimeout(() => (action.setCoverPage(null), clearTimeout(closing)), 200));
+    }, [displayState])
     useEffect(() => { return () => action.updateOptions({}, true); }, [])
-    return <div className='OptionsP'>
+    return <div className={classNames("OptionsP", displayState == "out" && "out")}
+        onClickCapture={(e) => displayState != "default" && e.stopPropagation()}>
         <div className='title'>{"设置"}</div>
         <div className='menu'>
             {Object.entries(options_Group).map(([k, v]) => {
-                return <a href={`#${k}`}>
-                    <div className={`group ${nowGroup == k ? "active" : ""}`} key={k}>{v.ch}</div>
+                return <a key={k} onClick={()=>document.getElementById(k).scrollIntoView()}>
+                    <div className={classNames("group", nowGroup == k && "active")}>{v.ch}</div>
                 </a>
             })}
         </div>
@@ -50,7 +58,7 @@ function OptionsP() {
                     {v.data.map(([name, ch, defaultValue, props]) => {
                         return <div className={`option-item`} key={name}>
                             <div className='ch'>{ch}</div>
-                            {props.icon && <div className={`icon ${props.icon}`}></div>}
+                            {props.icon && <div className={classNames("icon", props.icon)}></div>}
                             {props.type == "range" &&
                                 <input type={props.type} min={props.min} max={props.max} step={props.step ?? ((props.max - props.min) / 10)} value={Options[name]}
                                     onChange={(e) => {
@@ -63,27 +71,12 @@ function OptionsP() {
                     })}
                 </div>
             })}
-            {/* {options_List.map(([name, ch, defaultValue, props]) => {
-                return <div className={`option-item`} key={name}>
-                    <div className='ch'>{ch}</div>
-                    {props.icon && <div className={`icon ${props.icon}`}></div>}
-                    {props.type == "range" &&
-                        <input type={props.type} min={props.min} max={props.max} step={props.step ?? ((props.max - props.min) / 10)} value={Options[name]}
-                            onChange={(e) => {
-                                const newOption = {};
-                                Options[name] = newOption[name] = e.target.value;
-                                action.updateOptions(newOption);
-                            }}></input>}
-                    {<div className='value'>{Options[name]}</div>}
-                </div>
-            })} */}
         </div>
         <div className='fixed-buttons-bar'>
-            <div onClick={() => action.setCoverPage(null)} className='close'></div>
-            {pageState.activePage != "home" && <div className='home' onClick={() => {
-                action.setActivePage("home");
-                action.onLoaded_add(() => action.setCoverPage(null));
-            }}></div>}
+            <div className='close' onClickCapture={() => setDisplayState("out")}></div>
+            {pageState.activePage != "home" &&
+                <div className='home'
+                    onClickCapture={() => action.setActivePage("home")}></div>}
         </div>
     </div>
 }

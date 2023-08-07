@@ -55,7 +55,7 @@ export function DBget(base, key) {
             if (request.result) {
                 console.log('数据读取成功', request.result)
             } else {
-                console.log('未获得数据记录');
+                console.log('未获得数据记录',base, key);
             }
             resolve(request.result);
         };

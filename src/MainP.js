@@ -3,7 +3,7 @@ import { getFileSrc, getCharaPicSrc, wait } from "./data/extra-test-data.js"
 // import { getFileSrc, getCharaPicSrc } from "./data/test-data.js"
 import { createStyle, QStyle } from './data/spring.js'
 import { useSpring, animated, config } from 'react-spring'
-import { getOptions, pageContext } from './App.js'
+import { classNames, getOptions, pageContext } from './App.js'
 import './MainP.css'
 import Sound, { player } from './tools/Sound.js'
 import { DBget, DBput } from './tools/IndexedDB-controller.js'
@@ -262,7 +262,7 @@ function getCharas() {
                     }
         }, [phase, _charasPhase, _mainPhase]);
         return (
-            <animated.div className={`charaBox ${dat.position}`} style={style}>
+            <animated.div className={classNames("charaBox", dat.position)} style={style}>
                 <animated.img style={
                     (last && _charasPhase == "change" && nextPhase["change"]) ?
                         { opacity: changeStyle.opacity.to(e => 1.0 / (8 * e - 8.9) + 1 + 1 / 8.9) } : {}}
@@ -502,7 +502,7 @@ function MainP(props) {
         if (pageState.loadPhase) {
             setTimeout(() => {
                 _mainPhaseGO();
-            }, 2500);
+            }, 2000);
             // 加载后等候
         }
         else _mainPhaseGO();
@@ -512,14 +512,19 @@ function MainP(props) {
         if (mainPhase == "done") {
             setLastSentence(nowSentence);
             const old_readStory = globalSave.readStory;
-            !old_readStory.some(e => e == nowStory.id) && DBput("global", { key: "readStory", value: globalSave.readStory = [...old_readStory, nowStory.id] });
+            !old_readStory.some(e => e == `${nowBook.name}/${nowStory.id}`) && DBput("global", { key: "readStory", value: globalSave.readStory = [...old_readStory, `${nowBook.name}/${nowStory.id}`] });
+            action.autoSave();
             // console.log(lastSentence, nowSentence,6666);
             setFlag(false);
             if (nowSentence.options && !choiceState.state) {
                 setChoiceState({ state: "in" });
             };
             if (autoPlay) {
-                doAutoPlay();
+                const voice_audio = pageState.nowSound.voice.audio;
+                (voice_audio.paused) ?
+                    doAutoPlay() :
+                    voice_audio.onended = () => (doAutoPlay(), voice_audio.onended = null);
+                ;
             }
         }
     }, [mainPhase]);
@@ -540,7 +545,7 @@ function MainP(props) {
         }
     }, [choiceState.state])
     const [autoPlay, setAutoPlay] = useState(false);
-    useEffect(() => { autoPlay ? mainPhase=="done"&&doAutoPlay() : stopAutoPlay(); }, [autoPlay]);
+    useEffect(() => { autoPlay ? mainPhase == "done" && doAutoPlay() : stopAutoPlay(); }, [autoPlay]);
     const toNextSentence = useCallback(
         (() => {
             console.log("textPhase", textPhase, { placePhase, CGPhase })
@@ -550,7 +555,7 @@ function MainP(props) {
                     historySentence.push(action.getNow().sentence);
                     console.log('history', historySentence);
                     // player.setVolume(pageState.options.volume_ALL * pageState.options.volume_effect);
-                    player.play('https://chong-chan.cn/resource/extra_test_active/default/02510.ogg');
+                    player.play('https://chong-chan.cn/resource/extra_test_active/default/pop.ogg');
                     setIsNext(true);
                 }
                 else if (flag.end) {
@@ -580,7 +585,7 @@ function MainP(props) {
 
     const [doAutoPlay, stopAutoPlay] = ((e) => [
         () => {
-            const timeout =getOptions()["text_autoSpeed"] * (200 + 8 * nowSentence.text.length);
+            const timeout = getOptions()["text_autoSpeed"] * (200 + 8 * nowSentence.text.length);
             e.current && clearTimeout(e.current); e.current = setTimeout(() => {
                 toNextSentence();
                 e.current = null;
@@ -590,7 +595,7 @@ function MainP(props) {
     ])(useRef(null));
     const getTextBar = useCallback(
         (() => (
-            <div className='textBar'>
+            <div className='textBar' onClick={(e) => e.stopPropagation()}>
                 <div className='buttonBar'>
                     <div className='button' onClick={() => {
                         action.callSaveP();
@@ -621,7 +626,7 @@ function MainP(props) {
                 <LiuText
                     nextText={nextText} setNextText={setNextText}
                     textPhase={textPhase} setTextPhase={setTextPhase}
-                    playVoice={nowSentence.voice && (() => action.setVoice(nowSentence.voice))}
+                    playVoice={(() => action.setVoice(nowSentence.voice))}
                     onClick={nowSentence.options ? () => { } : () => toNextSentence()} />
             </div>
         )),
@@ -629,7 +634,8 @@ function MainP(props) {
     )
     return (
         ((nowSentence) => <div className={"MainP"} onClick={() =>
-            player.play('https://chong-chan.cn/resource/extra_test_active/default/02510.ogg')}>
+            player.play('https://chong-chan.cn/resource/extra_test_active/default/pop.ogg')
+        }>
             {<PlaceBox
                 nowPlace={nowSentence.place} lastPlace={lastSentence.place}
                 placePhase={placePhase} setPlacePhase={setPlacePhase}
@@ -644,7 +650,7 @@ function MainP(props) {
             />}
             {getTextBar()}
             {choiceState.state &&
-                <animated.div className={`choice ${choiceState.state}`} style={choiceStyle}>
+                <animated.div className={classNames("choice", choiceState.state)} style={choiceStyle}>
                     <div className='optionList'>
                         {nowSentence.options.map((e, i) => <div className={`option`}
                             onClick={choiceState.state != "wait" ? () => { } : () => {
@@ -665,7 +671,7 @@ function MainP(props) {
                         {historySentence.map((e, i) => (<div className='historySentence' key={i}>
                             <div className='charaName'>{e.charaName}</div>
                             <div className='text'>{e.text}</div>
-                            <div className='go' onClick={() => {
+                            <div className='go' onClick={(e) => {
                                 setCoverData({
                                     active: true,
                                     mission: () => {

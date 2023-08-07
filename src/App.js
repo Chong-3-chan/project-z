@@ -13,8 +13,10 @@ import { DBget, DBgetAll, DBput } from './tools/IndexedDB-controller.js'
 import SaveP from './SaveP.js'
 import LoadP from './LoadP.js'
 import Dialog from './Dialog.js'
-import { globalSave } from './main.js'
+import { RE_check, globalSave, readGlobal } from './main.js'
 import InformationP from './InformationP.js'
+import ContentP from './ContentP.js'
+export function classNames(...className) { return className.filter(e => e).join(" ") };
 export let visitable_information_key_list = [];
 function Mission() {
   this.list = [];
@@ -39,9 +41,18 @@ const activePage_map = {
   "home": {
     name: "home",
     getPreload: () => {
-      const readStory = globalSave.readStory ?? (globalSave.readStory = []);
-      homeResource_map.backgroundImage = homeResource_map.backgroundImageList.filter(e => !e.check.map(c => readStory.some((rs) => rs == c)).some(e => !e)).map(e => e.fileKey).reverse()[0];
-      return [{ name: "首页资源", data: [homeResource_map.backgroundImage] }];
+      readGlobal();
+      homeResource_map.backgroundImage = homeResource_map.backgroundImageList.filter(
+        e => RE_check(e)
+      ).map(e => e.fileKey).reverse()[0] ?? homeResource_map.backgroundImage;
+      // debugger;
+      Object.keys(BOOK).filter((bookId) => BOOK[bookId].start)
+        .forEach((bookId) => homeResource_map.booksCover[bookId] = {
+          fileKey: BOOK[bookId].cover ?? null,
+          disable: !RE_check(BOOK[bookId])
+        });
+      // console.log(homeResource_map.booksCover,BOOK["Book2"].check,RE_check({check:BOOK["Book2"].check}));
+      return [{ name: "首页资源", data: [homeResource_map.backgroundImage, ...Object.values(homeResource_map.booksCover).filter(e => e.fileKey).map(e => e.fileKey)] }];
     },
     ch: "首页",
     tips: ["home"],
@@ -54,14 +65,21 @@ const activePage_map = {
   "information": {
     name: "information",
     getPreload: () => {
-      const readStory = globalSave.readStory ?? (globalSave.readStory = []);
-      visitable_information_key_list = Object.entries(information_map).filter(([k, v]) => !v.check.map(c => readStory.some((rs) => rs == c)).some(ee => !ee)).map(([k, v]) => k);
+      visitable_information_key_list = Object.entries(information_map).filter(
+        ([k, v]) => RE_check(v)
+      ).sort(([, infoa], [, infob]) => infoa.order - infob.order).map(([k, v]) => k);
       console.log(visitable_information_key_list, "visitable_information_key_list")
-      const fileKey_list = Object.values(information_map).filter(e => !e.check.map(c => readStory.some((rs) => rs == c)).some(ee => !ee)).map(e => e.data.filter(ee => ee.fileKey).map(ee => ee.fileKey));
-      return [{ name: "档案资源", data: [homeResource_map.backgroundImage] }];
+      const fileKey_list = Object.values(information_map).filter(
+        e => RE_check(e)
+      ).map(e => e.data.filter(ee => ee.fileKey).map(ee => ee.fileKey)
+      ).flat(1);
+      // console.log(Object.values(information_map).filter(
+      //   e => RE_check(e)
+      // ))
+      return [{ name: "档案资源", data: [homeResource_map.backgroundImage, ...fileKey_list] }];
     },
     ch: "档案",
-    tips: ["infomation"]
+    tips: ["information"]
   }
 };
 function getCoverPageDOM(coverPage) {
@@ -72,6 +90,8 @@ function getCoverPageDOM(coverPage) {
       return <SaveP></SaveP>
     case "load":
       return <LoadP></LoadP>
+    case "content":
+      return <ContentP></ContentP>
     default:
       return <></>
   }
@@ -89,6 +109,7 @@ const soundRoads = [
   {
     key: "BGM",
     options: ["loop", "fade"],
+    audio: new Audio(),
     getVolume: () => pageState.options.volume_ALL * pageState.options.volume_BGM,
     display: {
       class: "BGM"
@@ -97,6 +118,8 @@ const soundRoads = [
   {
     key: "voice",
     options: [],
+    audio: new Audio(),
+    state: null,
     getVolume: () => pageState.options.volume_ALL * pageState.options.volume_voice,
   }
 ]
@@ -120,7 +143,7 @@ export const options_Group = {
     ]
   }
 }
-export const options_List = Object.values(options_Group).map(e=>e.data).flat(1);
+export const options_List = Object.values(options_Group).map(e => e.data).flat(1);
 const pageState = {//default values
   dialogData: null,
   activePage: null,
@@ -155,10 +178,13 @@ const pageState = {//default values
 };
 
 
-const onLoadedMission = new Mission();
+const onLoadEndMission = new Mission();
+const onLoadStartMission = new Mission();
 const pageAction = {
-  onLoaded: () => onLoadedMission.finish(),
-  onLoaded_add: (...funs) => onLoadedMission.add(...funs),
+  onLoadStart: () => onLoadStartMission.finish(),
+  onLoadStart_add: (...funs) => onLoadStartMission.add(...funs),
+  onLoadEnd: () => onLoadEndMission.finish(),
+  onLoadEnd_add: (...funs) => onLoadEndMission.add(...funs),
   load: null,
   setNext: null,
   setLoadPhase: null,
@@ -175,7 +201,8 @@ const pageAction = {
   save: null,
   loadSave: null,
   callDialog: null,
-  getSave: null
+  getSave: null,
+  autoSave:null
 }
 
 export const pageContext = React.createContext({ pageState: pageState, pageAction: pageAction });
@@ -222,7 +249,7 @@ function App(props) {
   useEffect(() => {
     if (!nextStory) return;
     pageAction.loadStroy(nextStory);
-    action.onLoaded_add(() => {
+    action.onLoadEnd_add(() => {
       if (nextBook) {
         setNowBook(nextBook);
         setNextBook(null);
@@ -262,6 +289,7 @@ function App(props) {
     }
   }
   pageAction.setNext = function (bookName, storyId, sentenceId) {
+    // debugger;
     if (loadPhase) {
       console.log({ loadPhase })
       return null;
@@ -339,6 +367,10 @@ function App(props) {
         ((parseInt(state.now.sentence) + 1).toString()).padStart(state.now.sentence.length, "0"));
     } else {
       // console.log("到达end");
+      console.log(nowStory)
+      // debugger;
+      const old_endedStory = globalSave.endedStory;
+      !old_endedStory.some(e => e == `${nowBook.name}/${nowStory.id}`) && DBput("global", { key: "endedStory", value: globalSave.endedStory = [...old_endedStory, `${nowBook.name}/${nowStory.id}`] });
       if (to) {
         setTo(null);
         return pageAction.setNext(undefined, to);
@@ -390,6 +422,7 @@ function App(props) {
       // helper下一次性加载book下的全部资源包，无论是否使用。
       // return [{ name: "all", data: Object.keys(file_map) }]
     })()));
+    pageAction.onLoadStart_add(() => pageAction.setBGM(null));
     return true;
   }
   useEffect(() => { title && tips && loadList && setLoadPhase("waiting"); }, [title, tips, loadList])
@@ -397,19 +430,32 @@ function App(props) {
     // debugger;
     action.load(story.preload, story.title, story.tips);
   }
-  pageAction.setActivePage = function (nextActivePageName) {
+  pageAction.setActivePage = function (nextActivePageName, data) {
     const np = activePage_map[nextActivePageName];
     // if(!np) return false;
     console.log("np", np, nextActivePageName);
-    action.onLoaded_add(() => {
+    action.onLoadEnd_add(() => {
       setActivePage(np.name);
+      pageAction.setCoverPage(null);
     })
     if (nextActivePageName == "main") {
-
-      pageAction.setNext(bookIds[0]);// *或读取存档！
+      const { bookName, storyId, sentenceId } = data;
+      pageAction.setNext(bookName ?? bookIds[0], storyId, sentenceId);// *或读取存档！
     }
     if (nextActivePageName == "home") {
-      pageAction.load(np.getPreload(), `进入${np.ch}`, np.tips);
+      if(window !== window.parent){
+        np.getPreload();//触发bookscover更新
+        pageAction.load([{name:"all",data:Object.keys(file_map)}], `进入${np.ch}`, np.tips);
+        pageAction.onLoadEnd_add(() => {
+          pageAction.setBGM(homeResource_map.BGM);
+          parent.postMessage({ from: "weimu", key: "returnData", data: { BOOK, STORY, pools: { file: FilePool.getFilePool(), package: getPackagePool() } } }, "*")
+        });
+        
+      }
+      else{
+        pageAction.load(np.getPreload(), `进入${np.ch}`, np.tips);
+        pageAction.onLoadEnd_add(() => pageAction.setBGM(homeResource_map.BGM));
+      }
     }
     if (nextActivePageName == "information") {
       pageAction.load(np.getPreload(), `进入${np.ch}`, np.tips);
@@ -428,13 +474,12 @@ function App(props) {
     pageAction.setCoverPage("load");
   }
   pageAction.setBGM = function (BGMfile) {
-    // debugger;
     setNowSound({
       ...nowSound,
       BGM: { ...nowSound.BGM, audioFile: BGMfile ? getFileSrc(BGMfile) : null, audioFileKey: BGMfile ?? null }
     })
   }
-  pageAction.setVoice = function (voicefile) {
+  window.fn = pageAction.setVoice = function (voicefile) {
     setNowSound({
       ...nowSound,
       voice: { ...nowSound.voice, audioFile: voicefile ? getFileSrc(voicefile) : null, audioFileKey: voicefile ?? null }
@@ -447,8 +492,8 @@ function App(props) {
     setOptions(new_options);
     player.setVolume(pageState.options.volume_ALL * pageState.options.volume_effect);
   }
-  pageAction.setCoverPage = function (flag) {
-    setCoverPage(flag);
+  pageAction.setCoverPage = function (pageName) {
+    setCoverPage(pageName);
   }
   pageAction.getSave = function (id) {
     const { book, story, sentence } = pageAction.getNow();
@@ -470,12 +515,17 @@ function App(props) {
     const newSave = pageAction.getSave(id);
     return DBput("save", newSave);
   }
+  pageAction.autoSave = function () {
+    const newSave = pageAction.getSave("auto");
+    return DBput("global", { key: "autoSave", value: newSave });
+  }
   pageAction.loadSave = function (save) {
     const { nowBookName, nodes } = save;
     const { bookName, storyId, sentenceId, to } = nodes[nowBookName];
-    action.setTo(to);
-    action.setNext(bookName, storyId, sentenceId);
-    action.onLoaded_add(() => setCoverPage(null));
+    pageAction.setTo(to);
+    if (pageState.activePage != "main") pageAction.setActivePage("main", { bookName, storyId, sentenceId });
+    else pageAction.setNext(bookName, storyId, sentenceId);
+    pageAction.onLoadEnd_add(() => (setCoverPage(null), setDialogData(null)));
   }
   pageAction.callDialog = function (data) {
     if (!data) {

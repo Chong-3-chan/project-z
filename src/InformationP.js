@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, Fragment } from 'react'
-import { pageContext, visitable_information_key_list } from './App';
+import { classNames, pageContext, visitable_information_key_list } from './App';
 import './InformationP.css'
 import { DBgetAll, DBput } from './tools/IndexedDB-controller';
 import { getFileSrc, information_map, wait } from './data/extra-test-data';
@@ -8,12 +8,12 @@ function InformationP() {
     const { pageAction: action, pageState } = useContext(pageContext);
     const [selected, setSelected] = useState(null);
     const visitableInformation = visitable_information_key_list.map(e => information_map[e]);
-    useEffect(() => {
+    // useEffect(() => {
 
-    }, [])
+    // }, [])
     return <div className='InformationP' style={{ backgroundImage: `url(${getFileSrc(homeResource_map.backgroundImage)})` }}>
         <div className='info-title-list'>
-            {visitableInformation.map(({ title, id }) => <div className={`info-title ${selected == id ? "selected" : ""}`} key={id} onClick={() => setSelected(id)}>{title}</div>)}
+            {visitableInformation.map(({ title, id }) => <div className={classNames("info-title", selected == id && "selected")} key={id} onClick={() => setSelected(id)}>{title}</div>)}
         </div>
         <div className='info-read'>
             {selected && <>

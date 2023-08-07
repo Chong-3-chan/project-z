@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
-import { pageContext } from './App';
+import { classNames, pageContext } from './App';
 import './SaveP.css'
 import { DBgetAll, DBput } from './tools/IndexedDB-controller';
 import { wait } from './data/extra-test-data';
@@ -11,6 +11,7 @@ function SaveP() {
     const [displayState, setDisplayState] = useState("in");
     useEffect(() => {
         closing && (clearTimeout(closing), closing = null);
+        displayState == "in" && setTimeout(() => setDisplayState("default"), 200);
         displayState == "out" && (closing = setTimeout(() => (action.setCoverPage(null), clearTimeout(closing)), 200));
     }, [displayState])
     const [newSave] = ((e) => [e.current])(useRef(action.getSave(null)));
@@ -19,7 +20,8 @@ function SaveP() {
             setSaveFiles(e);
         })
     }, [saveFiles])
-    return saveFiles && <div className={`SaveP ${displayState == "out" ? "out" : ""}`}>
+    return saveFiles && <div className={classNames("SaveP", displayState == "out" && "out")}
+        onClickCapture={(e) => displayState != "default" && e.stopPropagation()}>
         <div className='newSave'>
             <div className='text'>{"新存档！"}</div>
             <div className='saveFile'>
@@ -39,7 +41,7 @@ function SaveP() {
                     list[e.id] = e;
                 });
                 console.log(list, saveFiles)
-                return list.map((e, i) => <div key={e?.time ?? i} className='saveFile' onClick={displayState == "out" ? () => { } : () => {
+                return list.map((e, i) => <div key={e?.time ?? i} className='saveFile' onClickCapture={() => {
                     function putNewSave() {
                         action.callDialog({
                             title: "",
@@ -112,14 +114,9 @@ function SaveP() {
                     }</div>)
             })()}
         </div>
-        {/* {saveFiles.map(({ id, text, time }, i) => <div className='saveFile' key={id} onClick={displayState == "out" ? ()=>{} : () => action.loadSave(saveFiles[i])} >
-            <div>存档{id}</div>
-            <div>{text}</div>
-            <div>{(new Date(time)).toLocaleString()}</div>
-        </div>)} */}
 
         <div className='fixed-buttons-bar'>
-            <div className='close' onClick={displayState == "out" ? () => { } : () => setDisplayState("out")}></div>
+            <div className='close' onClickCapture={() => setDisplayState("out")}></div>
         </div>
     </div>
 }

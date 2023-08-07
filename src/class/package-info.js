@@ -40,7 +40,7 @@ PackageInfo.prototype.load = function (doSthWithMessage) {
             resolve("hit");
             return;
         }
-        const fromHelper = packageSampleUsing ? undefined : (await new Promise((resolve, reject) => message_getPackage({ packageKey: this.key }, e => resolve(Object.keys(e?.data).length ? e : undefined))));
+        const fromHelper = (packageSampleUsing || window === window.parent) ? undefined : (await new Promise((resolve, reject) => message_getPackage({ packageKey: this.key }, e => resolve(Object.keys(e?.data).length ? e : undefined))));
         const fromDB = await DBget("package", this.resourcePath);
         // debugger;
         console.log("dt", objCopy(fromHelper), objCopy(fromDB), ppool)
@@ -58,7 +58,7 @@ PackageInfo.prototype.load = function (doSthWithMessage) {
             return;
         }
         let worker = new Worker(new URL('./../worker/worker-getZip.js', import.meta.url));
-        worker.postMessage({path:this.resourcePath});
+        worker.postMessage({ path: this.resourcePath });
         worker.onmessage = (e) => {
             const msg = e.data;
             for (let key in msg) this[key] = msg[key];

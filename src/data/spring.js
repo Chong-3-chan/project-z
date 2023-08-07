@@ -42,7 +42,7 @@ export const QStyle = {
         }
     },
     CFG_B: {
-        config: { duration: 1000 },
+        config: { tension: 180, friction: 20 },
     },
     FT_B0: { filter: "brightness(0%)" },
     FT_B50: { filter: "brightness(50%)" },

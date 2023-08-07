@@ -158,8 +158,8 @@ function LoadingP(props) {
         return;
       case PHASE_LOADED:
         setTimeout(() => setPhase(PHASE_EXITING), 500);
-        // console.log(action.onLoaded);
-        action.onLoaded();
+        // console.log(action.onLoadEnd);
+        action.onLoadEnd();
         // console.log(errorTotal, loadedFileTotal);
         // ps_api.pause();
         // bds_api.pause();

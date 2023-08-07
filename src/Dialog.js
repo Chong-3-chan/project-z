@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useContext } from 'react'
 import './Dialog.css'
-import { pageContext } from './App';
+import { classNames, pageContext } from './App';
 import { wait } from './data/extra-test-data';
 let closing = null;
 function Dialog({ dialogData }) {
@@ -9,11 +9,13 @@ function Dialog({ dialogData }) {
     const [displayState, setDisplayState] = useState("in");
     useEffect(() => {
         closing && (clearTimeout(closing), closing = null);
-        displayState == "out" && (closing = setTimeout(() => (action.callDialog(null),clearTimeout(closing)), 200));
+        displayState == "in" && setTimeout(() => setDisplayState("default"), 200);
+        displayState == "out" && (closing = setTimeout(() => (action.callDialog(null), clearTimeout(closing)), 200));
     }, [displayState])
     // debugger;
 
-    return <div className={`dialog ${displayState=="out"?"out":""}`}>
+    return <div className={classNames("dialog", displayState == "out" && "out")}
+        onClickCapture={(e) => displayState != "default" && e.stopPropagation()}>
         <div className='dialog-inner'>
             <div className='header'>
                 {title}
@@ -24,7 +26,7 @@ function Dialog({ dialogData }) {
                 </div>
                 <div className='button-list'>
                     {buttons && buttons.map(({ ch, fun, style, notClose }, i) => {
-                        return <div key={i} className={`dialog-button ${style}`} onClick={displayState == "out" ? ()=>{} : () => {
+                        return <div key={i} className={classNames("dialog-button", style)} onClickCapture={() => {
                             const fn = fun ? fun() : undefined;
                             !notClose && (fn?.then ?
                                 fn.then(() => setDisplayState("out"))
